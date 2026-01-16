@@ -31,7 +31,7 @@ import { useTourPackage, useInternationalPackages } from '@/hooks/usePackages';
 import { tourPackagesAPI, TourReview, ReviewStats } from '@/services/packageService';
 import { useWishlist } from '@/hooks';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { addToCart, addToCartAsync } from '@/store/slices/cartSlice';
+import { addToCart, addToCartAsync, removeFromCart, removeFromCartAsync } from '@/store/slices/cartSlice';
 import { setTrip } from '@/store/slices/bookingSlice';
 import './PackageDetailPage.css';
 
@@ -401,18 +401,10 @@ export function PackageDetailPage() {
     navigate('/booking', { state: { tripData } });
   };
 
-  // Handle Inquire Now button click
+  // Handle Inquire Now button click - initiate phone call
   const handleInquireNow = () => {
-    if (!packageData) {
-      toast.error('Package information not available');
-      return;
-    }
-
-    // Scroll to contact section or navigate to contact page with package details
-    toast.success('Redirecting to inquiry form...', { icon: '📧', duration: 2000 });
-    // TODO: Implement contact form or navigate to contact page
-    // For now, scroll to bottom where contact details might be
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    window.location.href = 'tel:+919007000777';
+    toast.success('Initiating call...', { icon: '📞', duration: 2000 });
   };
 
   // Handle WhatsApp button click
@@ -438,13 +430,13 @@ export function PackageDetailPage() {
     toast.success('Opening WhatsApp...', { icon: '💬', duration: 2000 });
   };
 
-  // Handle Add to Cart button click
-  const handleAddToCart = () => {
+  // Handle Add/Remove Cart button click
+  const handleCartToggle = () => {
     if (!packageData) return;
 
-    // Require authentication to add to cart
+    // Require authentication
     if (!isAuthenticated) {
-      toast.error('Please login to add items to cart', {
+      toast.error('Please login to manage cart', {
         icon: '🔒',
         duration: 3000,
       });
@@ -452,15 +444,21 @@ export function PackageDetailPage() {
       return;
     }
 
-    // Check for duplicates
+    // If already in cart, remove it
     if (isInCart) {
-      toast.success('Item is already in your cart!', {
-        icon: '🛒',
+      if (isCartSynced) {
+        dispatch(removeFromCartAsync(packageData.id) as any);
+      } else {
+        dispatch(removeFromCart({ id: packageData.id, type: 'tour' }));
+      }
+      toast.success(`${packageData.title} removed from cart`, {
+        icon: '🗑️',
         duration: 2000,
       });
       return;
     }
 
+    // Add to cart
     const cartItem = {
       id: packageData.id,
       packageId: packageData.packageId,
@@ -472,7 +470,6 @@ export function PackageDetailPage() {
       duration: packageData.duration,
     };
 
-    // Use async action since user is authenticated
     if (isCartSynced) {
       dispatch(addToCartAsync(cartItem) as any);
     } else {
@@ -801,8 +798,8 @@ export function PackageDetailPage() {
                 className="package-cta-btn secondary"
                 onClick={handleInquireNow}
               >
-                <Mail size={18} />
-                Inquire Now
+                <Phone size={18} />
+                Call Now
               </motion.button>
 
               <motion.button
@@ -820,14 +817,13 @@ export function PackageDetailPage() {
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: isInCart ? 1 : 1.05 }}
-                whileTap={{ scale: isInCart ? 1 : 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
                 className={`package-cta-btn secondary ${isInCart ? 'in-cart' : ''}`}
-                onClick={handleAddToCart}
-                disabled={isInCart}
+                onClick={handleCartToggle}
               >
                 <ShoppingCart size={18} />
-                {isInCart ? 'Added to Cart' : 'Add to Cart'}
+                {isInCart ? 'Remove from Cart' : 'Add to Cart'}
               </motion.button>
             </div>
           </div>
