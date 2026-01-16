@@ -1,21 +1,50 @@
+# Multi-stage build for Booking Service
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy shared utilities
+COPY shared/ ./shared/
+
+# Copy booking-service files
+COPY booking-service/package*.json ./booking-service/
+COPY booking-service/prisma ./booking-service/prisma/
+
+# Install dependencies
+WORKDIR /app/booking-service
 RUN npm ci --only=production
 
-COPY prisma ./prisma
+# Generate Prisma Client
 RUN npx prisma generate
 
-COPY . .
-
+# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
+
+# Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
-COPY --from=builder /app /app
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
+# Copy from builder
+COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
+COPY --from=builder --chown=nodejs:nodejs /app/booking-service/node_modules ./booking-service/node_modules
+COPY --chown=nodejs:nodejs booking-service/ ./booking-service/
+
+WORKDIR /app/booking-service
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
 EXPOSE 3004
-CMD ["dumb-init", "node", "src/index.js"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3004/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start the service
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "src/server.js"]
