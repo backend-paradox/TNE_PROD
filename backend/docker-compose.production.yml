@@ -135,7 +135,6 @@ services:
 
   # Auth Service - Authentication & Authorization
   auth-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/auth-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: auth-service/Dockerfile
@@ -176,7 +175,6 @@ services:
 
   # User Service - User Profiles, Preferences, Social Features
   user-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/user-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: user-service/Dockerfile
@@ -214,7 +212,6 @@ services:
 
   # Booking Service - Trip, Hotel, Flight, Event Bookings
   booking-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/booking-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: booking-service/Dockerfile
@@ -252,7 +249,6 @@ services:
 
   # Payment Service - Razorpay Integration
   payment-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/payment-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: payment-service/Dockerfile
@@ -298,7 +294,6 @@ services:
 
   # Group Service - Trip Groups, Itineraries, Expenses, Polls
   group-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/group-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: group-service/Dockerfile
@@ -341,7 +336,6 @@ services:
 
   # Notification Service - Email, SMS, Push, In-App Notifications
   notification-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/notification-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: notification-service/Dockerfile
@@ -397,7 +391,6 @@ services:
 
   # Chat Service - Real-time Messaging with WebSocket
   chat-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/chat-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: chat-service/Dockerfile
@@ -440,7 +433,6 @@ services:
 
   # CRMSync Service - Admin Dashboard, Analytics
   crmsync-service:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/crmsync-service:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: crmsync-service/Dockerfile
@@ -484,7 +476,6 @@ services:
   # ==========================================================================
 
   api-gateway:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/api-gateway:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
@@ -545,7 +536,6 @@ services:
   # ==========================================================================
 
   frontend:
-    image: ${DOCKER_REGISTRY:-ghcr.io}/tne/frontend:${IMAGE_TAG:-latest}
     build:
       context: ../frontend
       dockerfile: Dockerfile
