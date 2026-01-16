@@ -292,6 +292,123 @@
   display: block;
 }
 
+/* Category Dropdown */
+.hero__category-dropdown {
+  position: relative;
+}
+
+.hero__category-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  border: none;
+  background: transparent;
+  color: var(--color-gray-700);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.hero__category-btn:hover {
+  background: var(--color-gray-100);
+}
+
+.hero__category-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary-500);
+}
+
+.hero__category-label {
+  display: block;
+}
+
+.hero__category-short {
+  display: none;
+}
+
+.hero__category-chevron {
+  color: var(--color-gray-400);
+  transition: transform var(--transition-base);
+}
+
+.hero__category-chevron.open {
+  transform: rotate(180deg);
+}
+
+.hero__category-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 180px;
+  background: var(--color-background);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2);
+  box-shadow: var(--shadow-2xl);
+  z-index: var(--z-hero-suggestions);
+}
+
+.hero__category-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: none;
+  background: transparent;
+  color: var(--color-gray-700);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  text-align: left;
+}
+
+.hero__category-option:hover {
+  background: var(--color-gray-100);
+}
+
+.hero__category-option.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+.hero__category-option svg {
+  color: var(--color-gray-400);
+}
+
+.hero__category-option.active svg {
+  color: var(--color-primary);
+}
+
+/* Search Loading Spinner */
+.hero__search-loading {
+  animation: spin 1s linear infinite;
+  color: var(--color-primary-500);
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Search Divider */
+.hero__search-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--color-gray-200);
+  flex-shrink: 0;
+}
+
 /* Suggestions */
 .hero__suggestions {
   position: absolute;
@@ -353,6 +470,122 @@
   color: var(--color-gray-400);
 }
 
+/* Live Search Results */
+.hero__search-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.hero__search-result {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: left;
+  width: 100%;
+}
+
+.hero__search-result:hover,
+.hero__search-result.selected {
+  background: var(--color-gray-100);
+}
+
+.hero__search-result-image {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.hero__search-result-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero__search-result-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-800);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero__search-result-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-gray-500);
+  font-size: 0.8rem;
+}
+
+.hero__search-result-location svg {
+  flex-shrink: 0;
+}
+
+.hero__search-result-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.hero__search-result-price {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
+.hero__search-result-duration {
+  color: var(--color-gray-500);
+  font-size: 0.75rem;
+}
+
+/* Search Loading State */
+.hero__search-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-8) var(--spacing-4);
+  color: var(--color-gray-500);
+}
+
+.hero__search-loading-state p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Search Empty State */
+.hero__search-empty {
+  text-align: center;
+  padding: var(--spacing-8) var(--spacing-4);
+  color: var(--color-gray-500);
+}
+
+.hero__search-empty p {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: 0.95rem;
+  color: var(--color-gray-700);
+}
+
+.hero__search-empty span {
+  font-size: 0.85rem;
+}
+
 /* Stats */
 .hero__stats {
   display: flex;
@@ -368,6 +601,7 @@
   display: block;
   font-size: 2rem;
   font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: white;
   line-height: 1.2;
 }
@@ -465,6 +699,14 @@
   .hero__subtitle {
     font-size: clamp(1.8rem, 4vw, 2.5rem);
   }
+
+  .hero__category-label {
+    display: none;
+  }
+
+  .hero__category-short {
+    display: block;
+  }
 }
 
 /* Mobile and small tablets (below 768px) */
@@ -476,18 +718,34 @@
     gap: var(--spacing-3);
   }
 
+  .hero__category-dropdown {
+    flex: 0 0 auto;
+  }
+
+  .hero__category-label {
+    display: none;
+  }
+
+  .hero__category-short {
+    display: block;
+  }
+
+  .hero__category-btn {
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+
+  .hero__search-divider {
+    display: none;
+  }
+
   .hero__search-field {
-    flex: 1 1 100%;
+    flex: 1 1 60%;
     padding: var(--spacing-2) 0;
     border-bottom: 1px solid var(--color-gray-200);
   }
 
   .hero__search-field:last-of-type {
     border-bottom: none;
-  }
-
-  .hero__search-divider {
-    display: none;
   }
 
   .hero__mic-btn {
@@ -509,6 +767,15 @@
 
   .hero__stat-value {
     font-size: 1.5rem;
+  }
+
+  .hero__search-result-image {
+    width: 48px;
+    height: 48px;
+  }
+
+  .hero__search-result-meta {
+    display: none;
   }
 }
 

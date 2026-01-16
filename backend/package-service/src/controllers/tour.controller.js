@@ -184,6 +184,26 @@ class TourController {
     }
   }
 
+  // GET /api/v1/tour-packages/search
+  async search(req, res) {
+    try {
+      const { q, category, limit } = req.query;
+      const packages = await tourService.search(q, category, parseInt(limit) || 10);
+      res.json({
+        success: true,
+        data: packages,
+        count: packages.length
+      });
+    } catch (error) {
+      console.error('Error searching packages:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search packages',
+        error: error.message
+      });
+    }
+  }
+
   // GET /api/v1/tour-packages/by-id/:id
   async getById(req, res) {
     try {

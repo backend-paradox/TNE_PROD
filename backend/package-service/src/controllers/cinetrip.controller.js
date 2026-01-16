@@ -61,6 +61,26 @@ class CineTripController {
     }
   }
 
+  // GET /api/v1/cinetrip-packages/search
+  async search(req, res) {
+    try {
+      const { q, limit } = req.query;
+      const packages = await cineTripService.search(q, parseInt(limit) || 10);
+      res.json({
+        success: true,
+        data: packages,
+        count: packages.length
+      });
+    } catch (error) {
+      console.error('Error searching cinetrip packages:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search cinetrip packages',
+        error: error.message
+      });
+    }
+  }
+
   // GET /api/v1/cinetrip-packages/:slug
   async getBySlug(req, res) {
     try {

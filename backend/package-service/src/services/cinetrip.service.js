@@ -55,6 +55,39 @@ class CineTripService {
     });
   }
 
+  // Search packages by query
+  async search(query, limit = 10) {
+    const where = { isActive: true };
+
+    if (query && query.trim()) {
+      const searchTerm = query.trim();
+      where.OR = [
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { shortDescription: { contains: searchTerm, mode: 'insensitive' } },
+        { category: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    return prisma.cineTripPackage.findMany({
+      where,
+      take: limit,
+      orderBy: [
+        { featured: 'desc' },
+        { sortOrder: 'asc' }
+      ],
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        price: true,
+        image: true,
+        duration: true,
+        category: true,
+        rating: true,
+      }
+    });
+  }
+
   // Create new package
   async create(data) {
     return prisma.cineTripPackage.create({ data });

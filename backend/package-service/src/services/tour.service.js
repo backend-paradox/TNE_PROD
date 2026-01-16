@@ -142,6 +142,51 @@ class TourService {
     return limit ? filtered.slice(0, limit) : filtered;
   }
 
+  // Search packages by query and optional category filter
+  async search(query, category = null, limit = 10) {
+    const where = { isActive: true };
+
+    // Category filter
+    if (category === 'domestic') {
+      where.country = 'India';
+    } else if (category === 'international') {
+      where.country = { not: 'India' };
+    }
+
+    // Text search across multiple fields
+    if (query && query.trim()) {
+      const searchTerm = query.trim();
+      where.OR = [
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { destination: { contains: searchTerm, mode: 'insensitive' } },
+        { state: { contains: searchTerm, mode: 'insensitive' } },
+        { country: { contains: searchTerm, mode: 'insensitive' } },
+        { tagline: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    return prisma.tourPackage.findMany({
+      where,
+      take: limit,
+      orderBy: [
+        { popular: 'desc' },
+        { sortOrder: 'asc' }
+      ],
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        destination: true,
+        state: true,
+        country: true,
+        startingPrice: true,
+        imageUrl: true,
+        duration: true,
+        rating: true,
+      }
+    });
+  }
+
   // Create new package
   async create(data) {
     return prisma.tourPackage.create({ data });

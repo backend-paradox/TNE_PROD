@@ -316,6 +316,12 @@ export function PackageDetailPage() {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!isAuthenticated) {
+      toast.error('Please login to save to wishlist', { icon: '🔒' });
+      navigate(`/auth?type=login&redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     const isInWishlist = isSaved(pkg.slug);
     toggleSave(pkg.slug, {
       type: 'tour',
@@ -719,6 +725,11 @@ export function PackageDetailPage() {
             </button>
             <button
               onClick={async () => {
+                if (!isAuthenticated) {
+                  toast.error('Please login to save to wishlist', { icon: '🔒' });
+                  navigate(`/auth?type=login&redirect=${encodeURIComponent(window.location.pathname)}`);
+                  return;
+                }
                 if (packageData) {
                   const wasInWishlist = isSaved(packageData.id);
                   await toggleSave(packageData.id, {

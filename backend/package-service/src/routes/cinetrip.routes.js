@@ -3,6 +3,7 @@ const router = express.Router();
 const cineTripController = require('../controllers/cinetrip.controller');
 
 // Special routes (before :slug to avoid conflicts)
+router.get('/search', cineTripController.search);
 router.get('/featured', cineTripController.getFeatured);
 router.get('/category/:category', cineTripController.getByCategory);
 
