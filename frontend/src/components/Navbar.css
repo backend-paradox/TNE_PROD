@@ -87,6 +87,7 @@
 .logo-ampersand {
   display: inline-block;
   color: var(--color-primary);
+  font-family: var(--font-heading);  /* Playfair Display - same as tour package titles */
   font-weight: 800;
   margin: 0 2px;
   font-style: italic;
