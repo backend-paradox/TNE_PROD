@@ -39,6 +39,7 @@ export function DestinationsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedContinent, setSelectedContinent] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   // Fetch packages from API (replacing destinations)
   const { data: domesticPackages, loading: domesticLoading, error: domesticError } = useDomesticPackages();
@@ -73,10 +74,13 @@ export function DestinationsPage() {
     <div className="destinations-page">
       {/* Hero Section */}
       <div className="destinations-hero">
-        <img
-          src={getMediaUrl("/assets/images/hero/contact_page_hero.webp")}
-          alt="Travel Destinations"
-          className="destinations-hero-image"
+        <iframe
+          className={`hero__video ${videoLoaded ? 'loaded' : ''}`}
+          src="https://www.youtube.com/embed/Kqv0oM8ODMs?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=Kqv0oM8ODMs&modestbranding=1&playsinline=1&disablekb=1"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          title="Destinations - Trip & Event"
+          onLoad={() => setTimeout(() => setVideoLoaded(true), 1500)}
         />
         <div className="destinations-hero-overlay" />
 
