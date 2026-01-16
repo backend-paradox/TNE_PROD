@@ -39,7 +39,7 @@ export function Logo({
       {showText && (
         <div className="logo-text-container">
           <span className="logo-brand" style={{ fontSize: textSize }}>
-            Trip<span className="logo-ampersand">&</span>Event
+            Trip<span className="logo-ampersand">&</span> Event
           </span>
           <span className="logo-tagline" style={{ fontSize: taglineSize }}>
             Explore • Experience • Enjoy
