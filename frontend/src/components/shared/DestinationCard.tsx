@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, MapPin, Heart } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { getMediaUrl } from '@/utils';
 import { useWishlist } from '@/hooks';
+import { useAppSelector } from '@/store/hooks';
 import toast from 'react-hot-toast';
 import './DestinationCard.css';
 
@@ -40,15 +41,23 @@ export function DestinationCard({
   slug,
   type = 'tour'
 }: DestinationCardProps) {
+  const navigate = useNavigate();
   // Extract slug from linkTo if not provided
   const packageSlug = slug || (linkTo !== '#' ? linkTo.split('/').pop() : '');
 
   const { isSaved, toggleSave } = useWishlist();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const isInWishlist = packageSlug ? isSaved(packageSlug) : false;
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error('Please login to save to wishlist', { icon: '🔒' });
+      navigate(`/auth?type=login&redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
 
     if (!packageSlug) return;
 

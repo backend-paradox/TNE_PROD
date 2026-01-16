@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Star,
   Clock,
@@ -9,9 +9,11 @@ import {
   Zap,
   ChevronRight
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { Trip } from '../../types';
 import { formatCurrency, formatDuration } from '../../utils';
 import { useWishlist } from '../../hooks';
+import { useAppSelector } from '../../store/hooks';
 import { LazyImage } from '../ui/LazyImage';
 
 interface TripCardProps {
@@ -24,7 +26,9 @@ interface TripCardProps {
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=600&fit=crop';
 
 export function TripCard({ trip, variant = 'default', className = '' }: TripCardProps) {
+  const navigate = useNavigate();
   const { isSaved, toggleSave } = useWishlist();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const saved = isSaved(trip.id);
   const [imageError, setImageError] = useState(false);
   const hasRating = Number.isFinite(trip.rating);
@@ -33,6 +37,13 @@ export function TripCard({ trip, variant = 'default', className = '' }: TripCard
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error('Please login to save to wishlist', { icon: '🔒' });
+      navigate(`/auth?type=login&redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     toggleSave(trip.id);
   };
 

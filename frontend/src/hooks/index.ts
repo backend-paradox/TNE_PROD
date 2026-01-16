@@ -67,6 +67,194 @@ export function useSearch(debounceMs: number = 300) {
   };
 }
 
+// Live Search Hook - API-based search with debouncing and category filter
+export type SearchCategory = 'all' | 'domestic' | 'international' | 'cinetrip';
+
+export interface SearchResult {
+  id: string;
+  slug: string;
+  name: string;
+  destination?: string;
+  state?: string;
+  country?: string;
+  price: number;
+  image: string;
+  duration: string;
+  rating?: number;
+  category?: string;
+  type: 'tour' | 'cinetrip';
+}
+
+export function useLiveSearch(debounceMs: number = 300) {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<SearchCategory>('all');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const searchPackages = useCallback(async (searchQuery: string, searchCategory: SearchCategory) => {
+    if (!searchQuery.trim() && searchCategory === 'all') {
+      setResults([]);
+      return;
+    }
+
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    setIsSearching(true);
+    setError(null);
+
+    try {
+      const combinedResults: SearchResult[] = [];
+
+      if (searchCategory === 'cinetrip') {
+        // Only search CineTrip
+        const response = await axiosInstance.get('/cinetrip-packages/search', {
+          params: { q: searchQuery, limit: 10 },
+          signal: abortControllerRef.current.signal,
+        });
+        const cineTripResults = response.data.data.map((pkg: any) => ({
+          id: pkg.id,
+          slug: pkg.slug,
+          name: pkg.name,
+          price: Number(pkg.price),
+          image: pkg.image,
+          duration: pkg.duration,
+          category: pkg.category,
+          rating: pkg.rating,
+          type: 'cinetrip' as const,
+        }));
+        combinedResults.push(...cineTripResults);
+      } else if (searchCategory === 'all') {
+        // Search both tour packages and CineTrip
+        const [tourResponse, cineTripResponse] = await Promise.all([
+          axiosInstance.get('/tour-packages/search', {
+            params: { q: searchQuery, limit: 6 },
+            signal: abortControllerRef.current.signal,
+          }),
+          axiosInstance.get('/cinetrip-packages/search', {
+            params: { q: searchQuery, limit: 4 },
+            signal: abortControllerRef.current.signal,
+          }),
+        ]);
+
+        const tourResults = tourResponse.data.data.map((pkg: any) => ({
+          id: pkg.id,
+          slug: pkg.slug,
+          name: pkg.name,
+          destination: pkg.destination,
+          state: pkg.state,
+          country: pkg.country,
+          price: Number(pkg.startingPrice),
+          image: pkg.imageUrl,
+          duration: pkg.duration,
+          rating: pkg.rating,
+          type: 'tour' as const,
+        }));
+
+        const cineTripResults = cineTripResponse.data.data.map((pkg: any) => ({
+          id: pkg.id,
+          slug: pkg.slug,
+          name: pkg.name,
+          price: Number(pkg.price),
+          image: pkg.image,
+          duration: pkg.duration,
+          category: pkg.category,
+          rating: pkg.rating,
+          type: 'cinetrip' as const,
+        }));
+
+        combinedResults.push(...tourResults, ...cineTripResults);
+      } else {
+        // Search tour packages with category filter (domestic/international)
+        const response = await axiosInstance.get('/tour-packages/search', {
+          params: { q: searchQuery, category: searchCategory, limit: 10 },
+          signal: abortControllerRef.current.signal,
+        });
+        const tourResults = response.data.data.map((pkg: any) => ({
+          id: pkg.id,
+          slug: pkg.slug,
+          name: pkg.name,
+          destination: pkg.destination,
+          state: pkg.state,
+          country: pkg.country,
+          price: Number(pkg.startingPrice),
+          image: pkg.imageUrl,
+          duration: pkg.duration,
+          rating: pkg.rating,
+          type: 'tour' as const,
+        }));
+        combinedResults.push(...tourResults);
+      }
+
+      setResults(combinedResults);
+    } catch (err: any) {
+      if (err.name !== 'AbortError' && err.name !== 'CanceledError') {
+        setError('Failed to search packages');
+        console.error('Search error:', err);
+      }
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  const handleSearch = useCallback((value: string) => {
+    setQuery(value);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      searchPackages(value, category);
+    }, debounceMs);
+  }, [debounceMs, category, searchPackages]);
+
+  const handleCategoryChange = useCallback((newCategory: SearchCategory) => {
+    setCategory(newCategory);
+    // Trigger new search with existing query
+    if (query.trim()) {
+      searchPackages(query, newCategory);
+    }
+  }, [query, searchPackages]);
+
+  const clearSearch = useCallback(() => {
+    setQuery('');
+    setResults([]);
+    setError(null);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  return {
+    query,
+    category,
+    results,
+    isSearching,
+    error,
+    handleSearch,
+    handleCategoryChange,
+    clearSearch,
+  };
+}
+
 // Wishlist Hook with API and localStorage persistence
 export interface WishlistItem {
   id: number;

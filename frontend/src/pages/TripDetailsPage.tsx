@@ -35,6 +35,7 @@ import { setLoginModalOpen } from '../store/slices/uiSlice';
 import { useWishlist } from '../hooks';
 import { formatCurrency, formatDuration, formatDate } from '../utils';
 import { Trip } from '../types';
+import toast from 'react-hot-toast';
 import './TripDetailsPage.css';
 
 export function TripDetailsPage() {
@@ -192,7 +193,14 @@ export function TripDetailsPage() {
             {/* Action Buttons */}
             <div className="trip-gallery-actions">
               <button
-                onClick={() => toggleSave(trip.id)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    toast.error('Please login to save to wishlist', { icon: '🔒' });
+                    navigate(`/auth?type=login&redirect=${encodeURIComponent(window.location.pathname)}`);
+                    return;
+                  }
+                  toggleSave(trip.id);
+                }}
                 className={`trip-action-btn wishlist ${isSaved(trip.id) ? 'saved' : ''}`}
               >
                 <Heart className={isSaved(trip.id) ? 'fill-current' : ''} />

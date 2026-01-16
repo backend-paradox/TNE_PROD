@@ -3,6 +3,7 @@ const router = express.Router();
 const tourController = require('../controllers/tour.controller');
 
 // Special routes (before :slug to avoid conflicts)
+router.get('/search', tourController.search);
 router.get('/trending', tourController.getTrending);
 router.get('/popular', tourController.getPopular);
 router.get('/domestic', tourController.getDomestic);
