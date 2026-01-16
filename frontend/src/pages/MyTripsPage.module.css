@@ -1,0 +1,584 @@
+/* MyTrips.module.css - Light & Airy Teal Theme */
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-gray-50);
+  padding: 2rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--color-gray-500);
+  margin: 0;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  min-height: 48px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #0d9488 100%);
+  background-size: 200% 100%;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(13, 148, 136, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.createButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.4);
+  background-position: 100% 0;
+}
+
+.createButton:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
+}
+
+.createButton svg {
+  transition: transform 0.2s ease;
+}
+
+.createButton:hover svg {
+  transform: scale(1.1);
+}
+
+/* Filter Tabs */
+.filterTabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 16px;
+  width: fit-content;
+}
+
+.filterTab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: var(--color-gray-500);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterTab:hover {
+  color: var(--color-primary);
+  background: rgba(13, 148, 136, 0.05);
+}
+
+.filterTabActive {
+  color: white;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.filterTabActive:hover {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+}
+
+.filterCount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.filterTabActive .filterCount {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Trips Grid */
+.tripsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.tripCard {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  height: 320px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.tripCard:hover {
+  border-color: rgba(13, 148, 136, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.12);
+}
+
+/* Trip Image */
+.tripImage {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+}
+
+.tripImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.tripCard:hover .tripImage img {
+  transform: scale(1.05);
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+}
+
+/* Trip Content */
+.tripContent {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+}
+
+.tripHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.destination {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin: 0;
+}
+
+.activeBadge {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.planningBadge {
+  background: rgba(13, 148, 136, 0.1);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Trip Info */
+.tripInfo {
+  display: flex;
+  gap: 2rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-gray-500);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.infoItem svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Progress Section */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressLabel {
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progressValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.progressBar {
+  height: 12px;
+  background: var(--color-gray-200) !important;
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progressBar [data-slot="progress-indicator"] {
+  background: linear-gradient(90deg, #0d9488 0%, #14b8a6 100%) !important;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.viewDetailsBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem !important;
+  height: auto !important;
+  min-height: 46px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #0d9488 100%) !important;
+  background-size: 200% 100%;
+  color: white !important;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none !important;
+  border-radius: 12px !important;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.viewDetailsBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(13, 148, 136, 0.4);
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #0f766e 100%) !important;
+}
+
+.viewDetailsBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 12px rgba(13, 148, 136, 0.25);
+}
+
+.viewDetailsBtn svg {
+  transition: transform 0.2s ease;
+}
+
+.viewDetailsBtn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 1280px) {
+  .tripCard {
+    grid-template-columns: 350px 1fr;
+    height: 300px;
+  }
+
+  .tripImage {
+    height: 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .createButton {
+    width: 100%;
+  }
+
+  .filterTabs {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filterTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tripCard {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .tripImage {
+    height: 250px;
+  }
+
+  .tripContent {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .tripImage {
+    height: 200px;
+  }
+
+  .tripContent {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .destination {
+    font-size: 1.5rem;
+  }
+
+  .tripHeader {
+    flex-direction: column;
+  }
+
+  .tripInfo {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+
+  .progressValue {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .tripsGrid {
+    gap: 1.5rem;
+  }
+
+  .tripCard {
+    border-radius: 16px;
+  }
+
+  .tripContent {
+    padding: 1.25rem;
+  }
+}
+
+/* Skeleton Loading States */
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.skeletonCard {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: 320px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+}
+
+.skeletonImage {
+  background: var(--color-gray-200);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeletonContent {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skeletonHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.skeletonTitle {
+  width: 200px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-gray-200);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeletonBadge {
+  width: 80px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--color-gray-200);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeletonInfo {
+  display: flex;
+  gap: 2rem;
+}
+
+.skeletonInfoItem {
+  width: 120px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--color-gray-200);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeletonProgress {
+  height: 12px;
+  width: 100%;
+  border-radius: 8px;
+  background: var(--color-gray-200);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeletonActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.skeletonButton {
+  width: 140px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-gray-200);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 1024px) {
+  .skeletonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .skeletonCard {
+    grid-template-columns: 1fr;
+  }
+
+  .skeletonImage {
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .skeletonCard {
+    min-height: auto;
+  }
+
+  .skeletonImage {
+    height: 200px;
+  }
+
+  .skeletonContent {
+    padding: 1.5rem;
+  }
+
+  .skeletonInfo {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .skeletonActions {
+    flex-direction: column;
+  }
+
+  .skeletonButton {
+    width: 100%;
+  }
+}

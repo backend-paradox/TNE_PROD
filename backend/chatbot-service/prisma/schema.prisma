@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Chat session to track conversation state
+// NOTE: This is one of only TWO tables used by the chatbot
+// All context, preferences, and lead data are stored in context JSON
+model ChatSession {
+  id        String   @id @default(uuid())
+  userId    Int?     @map("user_id") // Optional - for logged-in users (same experience as guests)
+
+  // Conversation context (JSON state machine)
+  // Stores: currentStep, destination, travelDate, travelers, tripType, budget,
+  //         selectedPackageId, selectedPackage, contact info, lead data, preferences
+  context   Json     @default("{}")
+
+  // Session metadata
+  isActive  Boolean  @default(true) @map("is_active")
+  lastActivityAt DateTime @default(now()) @map("last_activity_at")
+
+  // Voice input tracking
+  usedVoiceInput Boolean @default(false) @map("used_voice_input")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  messages  ChatMessage[]
+  leads     ChatbotLead[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([lastActivityAt])
+  @@map("chat_sessions")
+}
+
+// Individual chat messages
+model ChatMessage {
+  id        String      @id @default(uuid())
+  sessionId String      @map("session_id")
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Message content
+  role      String      // "user" | "assistant" | "system"
+  content   String      @db.Text
+
+  // Metadata for analytics, intent, entities
+  metadata  Json?
+
+  // Voice input flag
+  isVoiceInput Boolean @default(false) @map("is_voice_input")
+
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@index([role])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+// Dedicated table for chatbot leads - captures travel inquiries from conversations
+model ChatbotLead {
+  id              String   @id @default(uuid())
+  sessionId       String   @map("session_id")
+  session         ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId          Int?     @map("user_id")
+
+  // Contact information
+  name            String?
+  email           String?
+  phone           String?
+
+  // Travel preferences
+  destination     String?
+  packageId       String?  @map("package_id")
+  packageTitle    String?  @map("package_title")
+  travelDate      String?  @map("travel_date")
+  travelers       Json?    // { adults: 2, children: 1, total: 3 }
+  tripType        String?  @map("trip_type")
+  budget          Json?    // { min: 10000, max: 50000 }
+
+  // Lead scoring
+  priority        String   @default("LOW")  // LOW, MEDIUM, HIGH, URGENT
+  confidenceScore Int      @default(0) @map("confidence_score")
+  qualificationLevel String @default("COLD") @map("qualification_level") // COLD, INTERESTED, QUALIFIED, WARM, HOT
+  isQualified     Boolean  @default(false) @map("is_qualified")
+
+  // Lead status
+  status          String   @default("NEW")  // NEW, CONTACTED, CONVERTED, LOST
+  source          String   @default("chatbot")
+  bookingIntent   Boolean  @default(false) @map("booking_intent")
+  callbackRequested Boolean @default(false) @map("callback_requested")
+  notes           String?  @db.Text
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([priority])
+  @@index([status])
+  @@index([isQualified])
+  @@index([createdAt])
+  @@map("chatbot_leads")
+}

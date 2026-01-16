@@ -1,0 +1,318 @@
+// ==============================================================================
+// TNE Notification Service - Prisma Schema
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================================================
+// ENUMS
+// ==============================================================================
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+  READ
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  // Auth Events
+  WELCOME
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  LOGIN_ALERT
+  TWO_FACTOR_CODE
+
+  // Booking Events
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  BOOKING_REMINDER
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  REFUND_PROCESSED
+
+  // Group/Trip Events
+  GROUP_INVITATION
+  GROUP_JOINED
+  GROUP_LEFT
+  MEMBER_JOINED
+  MEMBER_LEFT
+  TRIP_REMINDER
+  TRIP_STARTED
+  TRIP_ENDED
+  ITINERARY_UPDATED
+
+  // Expense Events
+  EXPENSE_ADDED
+  EXPENSE_UPDATED
+  EXPENSE_SETTLED
+  PAYMENT_REQUESTED
+  PAYMENT_RECEIVED
+
+  // Chat Events
+  NEW_MESSAGE
+  MESSAGE_MENTION
+  GROUP_CHAT_ACTIVITY
+
+  // Poll Events
+  POLL_CREATED
+  POLL_ENDING_SOON
+  POLL_ENDED
+  POLL_RESULT
+
+  // Social Events
+  CONNECTION_REQUEST
+  CONNECTION_ACCEPTED
+  NEARBY_TRAVELLER
+  PROFILE_VIEW
+
+  // System Events
+  SYSTEM_ANNOUNCEMENT
+  MAINTENANCE_NOTICE
+  PROMOTIONAL
+  NEWSLETTER
+}
+
+// ==============================================================================
+// MODELS
+// ==============================================================================
+
+/// User's notification preferences per channel and type
+model NotificationPreference {
+  id        String   @id @default(uuid())
+  userId    Int
+
+  // Channel preferences
+  emailEnabled    Boolean @default(true)
+  smsEnabled      Boolean @default(false)
+  pushEnabled     Boolean @default(true)
+  inAppEnabled    Boolean @default(true)
+
+  // Type-specific preferences (JSON: { "BOOKING_CONFIRMED": { "email": true, "push": true } })
+  typePreferences Json    @default("{}")
+
+  // Quiet hours
+  quietHoursEnabled Boolean   @default(false)
+  quietHoursStart   String?   // "22:00"
+  quietHoursEnd     String?   // "08:00"
+  timezone          String    @default("Asia/Kolkata")
+
+  // Frequency controls
+  digestEnabled     Boolean   @default(false)
+  digestFrequency   String?   // "daily", "weekly"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
+  @@index([userId])
+}
+
+/// Individual notification record
+model Notification {
+  id          String   @id @default(uuid())
+  userId      Int
+
+  // Notification details
+  type        NotificationType
+  channel     NotificationChannel
+  priority    NotificationPriority @default(NORMAL)
+  status      NotificationStatus   @default(PENDING)
+
+  // Content
+  title       String
+  body        String
+  data        Json?     // Additional structured data
+  actionUrl   String?   // Deep link or web URL
+  imageUrl    String?   // Optional image
+
+  // Metadata
+  templateId  String?   // Reference to template used
+  groupId     String?   // For grouping related notifications
+  externalId  String?   // External reference (e.g., booking ID)
+
+  // Delivery tracking
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+  failedAt    DateTime?
+  failureReason String?
+  retryCount  Int       @default(0)
+
+  // Channel-specific data
+  emailMessageId String? // Email Message-ID header
+  smsMessageSid  String? // Twilio SID
+  pushMessageId  String? // Firebase message ID
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime? // For time-sensitive notifications
+
+  @@index([userId, status])
+  @@index([userId, type])
+  @@index([userId, channel])
+  @@index([userId, readAt])
+  @@index([status, channel])
+  @@index([createdAt])
+  @@index([externalId])
+}
+
+/// Push notification device tokens
+model PushToken {
+  id          String   @id @default(uuid())
+  userId      Int
+
+  token       String   @unique
+  platform    String   // "web", "ios", "android"
+  deviceId    String?  // Unique device identifier
+  deviceName  String?  // "iPhone 15 Pro"
+
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@index([token])
+}
+
+/// Email/notification templates
+model NotificationTemplate {
+  id          String   @id @default(uuid())
+
+  name        String   @unique // "welcome_email", "booking_confirmed"
+  type        NotificationType
+  channel     NotificationChannel
+
+  // Template content (Handlebars)
+  subject     String?  // For email
+  body        String   // Main content
+  htmlBody    String?  // HTML version for email
+
+  // Metadata
+  description String?
+  variables   Json?    // List of expected variables
+
+  isActive    Boolean  @default(true)
+  version     Int      @default(1)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+  @@index([type, channel])
+}
+
+/// Notification delivery logs for analytics
+model NotificationLog {
+  id              String   @id @default(uuid())
+  notificationId  String
+
+  event           String   // "sent", "delivered", "opened", "clicked", "bounced", "failed"
+  channel         NotificationChannel
+
+  metadata        Json?    // Additional event data
+  ipAddress       String?
+  userAgent       String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([notificationId])
+  @@index([event])
+  @@index([createdAt])
+}
+
+/// Scheduled/recurring notifications
+model ScheduledNotification {
+  id          String   @id @default(uuid())
+  userId      Int?     // null for broadcast
+
+  type        NotificationType
+  channels    NotificationChannel[]
+
+  // Content
+  title       String
+  body        String
+  data        Json?
+
+  // Schedule
+  scheduledAt DateTime
+  timezone    String   @default("Asia/Kolkata")
+  isRecurring Boolean  @default(false)
+  cronPattern String?  // For recurring: "0 9 * * 1" (Mondays at 9am)
+
+  // Status
+  status      String   @default("scheduled") // "scheduled", "processing", "completed", "cancelled"
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([scheduledAt, status])
+  @@index([userId])
+}
+
+/// Broadcast notifications to multiple users
+model BroadcastNotification {
+  id          String   @id @default(uuid())
+
+  type        NotificationType
+  channels    NotificationChannel[]
+  priority    NotificationPriority @default(NORMAL)
+
+  // Content
+  title       String
+  body        String
+  data        Json?
+  actionUrl   String?
+
+  // Targeting
+  targetAll   Boolean  @default(false)
+  targetUserIds Int[]  // Specific user IDs
+  targetFilters Json?  // { "role": "USER", "hasActiveTrip": true }
+
+  // Status
+  status      String   @default("draft") // "draft", "scheduled", "sending", "completed"
+  totalRecipients Int  @default(0)
+  sentCount   Int      @default(0)
+  failedCount Int      @default(0)
+
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdBy   Int      // Admin user ID
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

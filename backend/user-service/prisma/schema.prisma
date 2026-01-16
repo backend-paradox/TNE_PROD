@@ -1,0 +1,586 @@
+// This is your Prisma schema file
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  PREFER_NOT_TO_SAY
+}
+
+enum KYCStatus {
+  PENDING
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum KYCDocumentType {
+  AADHAAR
+  PAN
+  PASSPORT
+  DRIVING_LICENSE
+  VOTER_ID
+}
+
+enum AddressType {
+  HOME
+  WORK
+  OTHER
+}
+
+enum TravelStyle {
+  BUDGET
+  MID_RANGE
+  LUXURY
+  BACKPACKER
+}
+
+enum TravelDocumentType {
+  PASSPORT
+  VISA
+  TRAVEL_INSURANCE
+  VACCINATION
+}
+
+enum DietaryRestriction {
+  VEGETARIAN
+  VEGAN
+  HALAL
+  KOSHER
+  GLUTEN_FREE
+  NUT_FREE
+  LACTOSE_FREE
+  NONE
+}
+
+enum AccommodationType {
+  HOTEL
+  HOSTEL
+  AIRBNB
+  CAMPING
+  RESORT
+  HOMESTAY
+  COUCHSURFING
+}
+
+enum TravelPace {
+  SLOW
+  MODERATE
+  FAST
+}
+
+enum SmokingPreference {
+  SMOKER
+  NON_SMOKER
+  NO_PREFERENCE
+}
+
+// ==================== MODELS ====================
+
+model UserProfile {
+  id                Int       @id @default(autoincrement())
+  authId            Int       @unique @map("auth_id")
+
+  // Basic info
+  name              String    @db.VarChar(120)
+  email             String    @unique @db.VarChar(120)
+  phone             String?   @db.VarChar(20)
+  gender            Gender?
+  maritalStatus     MaritalStatus? @map("marital_status")
+  dateOfBirth       DateTime? @map("date_of_birth") @db.Date
+  profilePicUrl     String?   @map("profile_pic_url") @db.Text
+
+  // New profile enhancements
+  bio               String?   @db.Text
+  languages         Json?     @db.JsonB // Array of languages: ["English", "Hindi", "Spanish"]
+  nationality       String?   @db.VarChar(100)
+  passportCountry   String?   @map("passport_country") @db.VarChar(100)
+  travelStyle       TravelStyle?  @map("travel_style")
+  interests         Json?     @db.JsonB // ["adventure", "culture", "food", "photography"]
+  occupation        String?   @db.VarChar(100)
+  socialLinks       Json?     @map("social_links") @db.JsonB // { instagram: "", linkedin: "", twitter: "" }
+
+  // Travel personality & social features (for TravelConnect)
+  visitedCities       Json?   @map("visited_cities") @db.JsonB // ["Paris", "Tokyo", "Mumbai", "New York"]
+  socialVibeScore     Float?  @default(0) @map("social_vibe_score") // Compatibility score for matching
+
+  // Current location tracking (for nearby travellers feature)
+  currentLocationLat  Float?  @map("current_location_lat")
+  currentLocationLng  Float?  @map("current_location_lng")
+  currentLocationName String? @map("current_location_name") @db.VarChar(200) // "Mumbai, India"
+  locationUpdatedAt   DateTime? @map("location_updated_at") @db.Timestamptz(3)
+
+  // Verification & Stats
+  isVerified        Boolean   @default(false) @map("is_verified")
+  rating            Float?    @default(0)
+  totalTrips        Int       @default(0) @map("total_trips")
+  totalReviews      Int       @default(0) @map("total_reviews")
+
+  // Legacy fields (kept for backward compatibility, will be removed)
+  emergencyContact  Json?     @map("emergency_contact") @db.JsonB
+  preferences       Json?     @db.JsonB
+
+  // Timestamps
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relations
+  addresses           Address[]
+  kycDocuments        KYCDocument[]
+  travelPreferences   TravelPreferences?
+  travelDocuments     TravelDocument[]
+  emergencyContacts   EmergencyContact[]
+  blockedUsers        UserBlock[] @relation("BlockerUser")
+  blockedByUsers      UserBlock[] @relation("BlockedUser")
+
+  // Social relations
+  sentConnections     UserConnection[] @relation("ConnectionRequester")
+  receivedConnections UserConnection[] @relation("ConnectionAddressee")
+  activities          UserActivity[]
+
+  // Wishlist & Reviews
+  wishlistItems       WishlistItem[]
+  reviews             Review[]
+
+  @@index([authId])
+  @@index([email])
+  @@index([isVerified])
+  @@index([travelStyle])
+  @@index([rating])
+  @@index([socialVibeScore])
+  @@index([currentLocationLat, currentLocationLng])
+  @@index([locationUpdatedAt])
+  @@map("user_profiles")
+}
+
+model Address {
+  id              Int         @id @default(autoincrement())
+  userProfileId   Int         @map("user_profile_id")
+  type            AddressType @default(HOME)
+
+  // Address fields
+  label           String?     @db.VarChar(50)
+  addressLine1    String      @map("address_line1") @db.VarChar(255)
+  addressLine2    String?     @map("address_line2") @db.VarChar(255)
+  city            String      @db.VarChar(100)
+  state           String      @db.VarChar(100)
+  country         String      @db.VarChar(100)
+  pincode         String      @db.VarChar(10)
+
+  // Geolocation
+  latitude        Float?
+  longitude       Float?
+
+  // Status
+  isDefault       Boolean     @default(false) @map("is_default")
+
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([userProfileId])
+  @@index([isDefault])
+  @@map("addresses")
+}
+
+model KYCDocument {
+  id              Int             @id @default(autoincrement())
+  userProfileId   Int             @map("user_profile_id")
+  documentType    KYCDocumentType @map("document_type")
+
+  // Document details
+  documentNumber  String          @map("document_number") @db.VarChar(50)
+  documentName    String?         @map("document_name") @db.VarChar(100)
+
+  // File details
+  frontImageUrl   String          @map("front_image_url") @db.Text
+  backImageUrl    String?         @map("back_image_url") @db.Text
+
+  // Verification
+  status          KYCStatus       @default(PENDING)
+  submittedAt     DateTime?       @map("submitted_at") @db.Timestamptz(3)
+  verifiedAt      DateTime?       @map("verified_at") @db.Timestamptz(3)
+  verifiedBy      Int?            @map("verified_by")
+  rejectedAt      DateTime?       @map("rejected_at") @db.Timestamptz(3)
+  rejectionReason String?         @map("rejection_reason") @db.Text
+
+  // Expiry
+  expiryDate      DateTime?       @map("expiry_date") @db.Date
+
+  // Timestamps
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile     @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([userProfileId])
+  @@index([status])
+  @@index([documentType])
+  @@map("kyc_documents")
+}
+
+model TravelPreferences {
+  id                    Int       @id @default(autoincrement())
+  userProfileId         Int       @unique @map("user_profile_id")
+
+  // Destinations
+  preferredDestinations Json?     @map("preferred_destinations") @db.JsonB // ["Paris", "Tokyo", "Bali"]
+  avoidDestinations     Json?     @map("avoid_destinations") @db.JsonB // ["Crowded cities"]
+
+  // Dietary & Lifestyle
+  dietaryRestrictions   DietaryRestriction[] @map("dietary_restrictions")
+  accommodationTypes    AccommodationType[]  @map("accommodation_types")
+  travelPace            TravelPace?          @map("travel_pace")
+
+  // Budget
+  budgetPerDayMin       Int?      @map("budget_per_day_min")
+  budgetPerDayMax       Int?      @map("budget_per_day_max")
+  budgetCurrency        String?   @default("INR") @map("budget_currency") @db.VarChar(3)
+
+  // Preferences
+  smokingPreference     SmokingPreference? @map("smoking_preference")
+  petFriendly           Boolean   @default(false) @map("pet_friendly")
+  accessibilityNeeds    Json?     @map("accessibility_needs") @db.JsonB // { wheelchair: true, hearing: false }
+
+  // Group preferences
+  preferredGroupSize    Int?      @map("preferred_group_size")
+  preferredAgeRangeMin  Int?      @map("preferred_age_range_min")
+  preferredAgeRangeMax  Int?      @map("preferred_age_range_max")
+  preferredGender       Gender?   @map("preferred_gender")
+
+  // Timestamps
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile           UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([userProfileId])
+  @@index([travelPace])
+  @@index([smokingPreference])
+  @@map("travel_preferences")
+}
+
+model TravelDocument {
+  id              Int                 @id @default(autoincrement())
+  userProfileId   Int                 @map("user_profile_id")
+  type            TravelDocumentType
+
+  // Document details
+  documentNumber  String              @map("document_number") @db.VarChar(50)
+  documentName    String?             @map("document_name") @db.VarChar(100)
+  issuingCountry  String              @map("issuing_country") @db.VarChar(100)
+
+  // Dates
+  issueDate       DateTime?           @map("issue_date") @db.Date
+  expiryDate      DateTime?           @map("expiry_date") @db.Date
+
+  // Visa specific fields
+  visaType        String?             @map("visa_type") @db.VarChar(50) // Tourist, Business, Work
+  visaCountry     String?             @map("visa_country") @db.VarChar(100)
+  visaEntryType   String?             @map("visa_entry_type") @db.VarChar(20) // Single, Multiple
+
+  // File storage
+  documentUrl     String?             @map("document_url") @db.Text
+
+  // Reminder
+  reminderSent    Boolean             @default(false) @map("reminder_sent")
+  reminderDate    DateTime?           @map("reminder_date") @db.Timestamptz(3)
+
+  // Timestamps
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile         @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([userProfileId])
+  @@index([type])
+  @@index([expiryDate])
+  @@map("travel_documents")
+}
+
+model EmergencyContact {
+  id              Int       @id @default(autoincrement())
+  userProfileId   Int       @map("user_profile_id")
+
+  // Contact details
+  name            String    @db.VarChar(120)
+  relationship    String    @db.VarChar(50) // Brother, Mother, Friend, Spouse
+  phone           String    @db.VarChar(20)
+  email           String?   @db.VarChar(120)
+  countryCode     String?   @map("country_code") @db.VarChar(5) // +91, +1
+
+  // Priority
+  isPrimary       Boolean   @default(false) @map("is_primary")
+
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([userProfileId])
+  @@index([isPrimary])
+  @@map("emergency_contacts")
+}
+
+model UserBlock {
+  id              Int       @id @default(autoincrement())
+  blockerUserId   Int       @map("blocker_user_id")
+  blockedUserId   Int       @map("blocked_user_id")
+
+  // Block details
+  reason          String?   @db.Text
+
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relations
+  blockerUser     UserProfile @relation("BlockerUser", fields: [blockerUserId], references: [id], onDelete: Cascade)
+  blockedUser     UserProfile @relation("BlockedUser", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerUserId, blockedUserId])
+  @@index([blockerUserId])
+  @@index([blockedUserId])
+  @@map("user_blocks")
+}
+
+// ==================== CONNECTION/FRIEND SYSTEM ====================
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  BLOCKED
+}
+
+model UserConnection {
+  id              Int               @id @default(autoincrement())
+  requesterId     Int               @map("requester_id")
+  addresseeId     Int               @map("addressee_id")
+
+  // Connection details
+  status          ConnectionStatus  @default(PENDING)
+  message         String?           @db.Text // Optional message with request
+
+  // Timestamps
+  requestedAt     DateTime          @default(now()) @map("requested_at") @db.Timestamptz(3)
+  respondedAt     DateTime?         @map("responded_at") @db.Timestamptz(3)
+
+  // Relations
+  requester       UserProfile       @relation("ConnectionRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee       UserProfile       @relation("ConnectionAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId, status])
+  @@index([addresseeId, status])
+  @@index([status])
+  @@map("user_connections")
+}
+
+// ==================== ACTIVITY FEED ====================
+
+enum ActivityType {
+  PROFILE_CREATED
+  PROFILE_UPDATED
+  AVATAR_CHANGED
+  BADGE_EARNED
+  TRIP_JOINED
+  TRIP_CREATED
+  TRIP_COMPLETED
+  GROUP_JOINED
+  GROUP_CREATED
+  EXPENSE_ADDED
+  REVIEW_POSTED
+  CONNECTION_MADE
+  LOCATION_UPDATED
+  ACHIEVEMENT_UNLOCKED
+}
+
+model UserActivity {
+  id              Int           @id @default(autoincrement())
+  userProfileId   Int           @map("user_profile_id")
+
+  // Activity details
+  type            ActivityType
+  title           String        @db.VarChar(255)
+  description     String?       @db.Text
+  metadata        Json?         @db.JsonB // { tripId: 123, groupName: "Goa Trip 2024" }
+
+  // References
+  referenceType   String?       @map("reference_type") @db.VarChar(50) // "trip", "group", "booking"
+  referenceId     String?       @map("reference_id") @db.VarChar(50)
+
+  // Privacy
+  isPublic        Boolean       @default(true) @map("is_public")
+
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile   @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@index([userProfileId, createdAt])
+  @@index([type])
+  @@index([isPublic])
+  @@map("user_activities")
+}
+
+// ==================== WISHLIST ====================
+
+enum WishlistItemType {
+  PACKAGE
+  HOTEL
+  ACTIVITY
+  DESTINATION
+  FLIGHT
+}
+
+model WishlistItem {
+  id              Int               @id @default(autoincrement())
+  userProfileId   Int               @map("user_profile_id")
+
+  // Item details
+  itemType        WishlistItemType  @map("item_type")
+  itemId          String            @map("item_id") @db.VarChar(100) // External ID from CRM
+
+  // Cached item data (for quick display without CRM call)
+  itemName        String            @map("item_name") @db.VarChar(255)
+  itemImage       String?           @map("item_image") @db.Text
+  itemPrice       Decimal?          @map("item_price") @db.Decimal(12, 2)
+  itemCurrency    String?           @default("INR") @map("item_currency") @db.VarChar(3)
+  itemDestination String?           @map("item_destination") @db.VarChar(200)
+  itemMetadata    Json?             @map("item_metadata") @db.JsonB // Extra data like duration, rating
+
+  // User notes
+  notes           String?           @db.Text
+
+  // Priority
+  priority        Int               @default(0) // Higher = more priority
+
+  // Timestamps
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile       @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([userProfileId, itemType, itemId])
+  @@index([userProfileId])
+  @@index([itemType])
+  @@index([createdAt])
+  @@map("wishlist_items")
+}
+
+// ==================== REVIEWS ====================
+
+enum ReviewType {
+  PACKAGE
+  HOTEL
+  ACTIVITY
+  DESTINATION
+  VENDOR
+  GROUP_TRIP
+}
+
+model Review {
+  id              Int           @id @default(autoincrement())
+  userProfileId   Int           @map("user_profile_id")
+
+  // Review target
+  reviewType      ReviewType    @map("review_type")
+  targetId        String        @map("target_id") @db.VarChar(100) // External ID
+
+  // Booking reference (optional - to verify user actually booked)
+  bookingId       String?       @map("booking_id") @db.VarChar(100)
+
+  // Review content
+  rating          Int           // 1-5 stars
+  title           String?       @db.VarChar(255)
+  content         String        @db.Text
+
+  // Cached target info
+  targetName      String        @map("target_name") @db.VarChar(255)
+  targetImage     String?       @map("target_image") @db.Text
+
+  // Media attachments
+  images          Json?         @db.JsonB // Array of image URLs
+
+  // Review aspects (for detailed ratings)
+  aspectRatings   Json?         @map("aspect_ratings") @db.JsonB // { cleanliness: 4, service: 5, value: 3 }
+
+  // Pros and Cons
+  pros            Json?         @db.JsonB // Array of strings
+  cons            Json?         @db.JsonB // Array of strings
+
+  // Trip details
+  tripDate        DateTime?     @map("trip_date") @db.Date
+  travelType      String?       @map("travel_type") @db.VarChar(50) // Solo, Couple, Family, Friends
+
+  // Moderation
+  isVerified      Boolean       @default(false) @map("is_verified") // Verified purchase
+  isApproved      Boolean       @default(true) @map("is_approved") // Admin approved
+  isFeatured      Boolean       @default(false) @map("is_featured")
+
+  // Engagement
+  helpfulCount    Int           @default(0) @map("helpful_count")
+  reportCount     Int           @default(0) @map("report_count")
+
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  userProfile     UserProfile   @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  helpfulVotes    ReviewHelpful[]
+
+  @@unique([userProfileId, reviewType, targetId])
+  @@index([userProfileId])
+  @@index([reviewType, targetId])
+  @@index([rating])
+  @@index([isApproved, createdAt])
+  @@map("reviews")
+}
+
+model ReviewHelpful {
+  id              Int       @id @default(autoincrement())
+  reviewId        Int       @map("review_id")
+  userProfileId   Int       @map("user_profile_id")
+
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relations
+  review          Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userProfileId])
+  @@index([reviewId])
+  @@map("review_helpful")
+}

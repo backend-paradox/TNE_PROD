@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CARD
+  UPI
+  NETBANKING
+  WALLET
+  EMI
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+model Payment {
+  id                 Int            @id @default(autoincrement())
+  orderId            String         @unique @map("order_id") @db.VarChar(255)
+  bookingId          Int            @map("booking_id")
+  userId             Int            @map("user_id")
+  amount             Decimal        @db.Decimal(10, 2)
+  currency           String         @default("INR") @db.VarChar(3)
+  status             PaymentStatus  @default(PENDING)
+  paymentMethod      PaymentMethod? @map("payment_method")
+
+  // Razorpay fields
+  razorpayOrderId    String?        @unique @map("razorpay_order_id") @db.VarChar(255)
+  razorpayPaymentId  String?        @unique @map("razorpay_payment_id") @db.VarChar(255)
+  razorpaySignature  String?        @map("razorpay_signature") @db.VarChar(512)
+
+  // Additional info
+  description        String?        @db.Text
+  receipt            String?        @db.VarChar(255)
+  notes              Json?          @db.JsonB
+  metadata           Json?          @db.JsonB
+
+  // Payment details
+  cardLast4          String?        @map("card_last4") @db.VarChar(4)
+  cardNetwork        String?        @map("card_network") @db.VarChar(50)
+  bankName           String?        @map("bank_name") @db.VarChar(100)
+  upiId              String?        @map("upi_id") @db.VarChar(100)
+  walletName         String?        @map("wallet_name") @db.VarChar(50)
+
+  // Failure info
+  failureReason      String?        @map("failure_reason") @db.Text
+  errorCode          String?        @map("error_code") @db.VarChar(50)
+  errorDescription   String?        @map("error_description") @db.Text
+
+  // Timestamps
+  paidAt             DateTime?      @map("paid_at") @db.Timestamptz(3)
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  refunds            Refund[]
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+model Refund {
+  id                 Int           @id @default(autoincrement())
+  paymentId          Int           @map("payment_id")
+  refundId           String        @unique @map("refund_id") @db.VarChar(255)
+  amount             Decimal       @db.Decimal(10, 2)
+  currency           String        @default("INR") @db.VarChar(3)
+  status             RefundStatus  @default(PENDING)
+
+  // Razorpay fields
+  razorpayRefundId   String?       @unique @map("razorpay_refund_id") @db.VarChar(255)
+
+  // Refund details
+  reason             String?       @db.Text
+  notes              Json?         @db.JsonB
+  receipt            String?       @db.VarChar(255)
+
+  // Processing info
+  speedProcessed     String?       @map("speed_processed") @db.VarChar(20)
+  failureReason      String?       @map("failure_reason") @db.Text
+
+  // Timestamps
+  processedAt        DateTime?     @map("processed_at") @db.Timestamptz(3)
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  payment            Payment       @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@index([status])
+  @@index([razorpayRefundId])
+  @@map("refunds")
+}
+
+model WebhookLog {
+  id                 Int           @id @default(autoincrement())
+  event              String        @db.VarChar(100)
+  payload            Json          @db.JsonB
+  razorpaySignature  String?       @map("razorpay_signature") @db.VarChar(512)
+  processed          Boolean       @default(false)
+  processingError    String?       @map("processing_error") @db.Text
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([event])
+  @@index([processed])
+  @@index([createdAt])
+  @@map("webhook_logs")
+}

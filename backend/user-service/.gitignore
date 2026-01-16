@@ -1,0 +1,21 @@
+node_modules
+# node / frontend
+node_modules/
+frontend/node_modules/
+frontend/.vite/
+
+# logs
+logs/
+*.log
+*-audit.json
+
+# env
+.env
+.env.*
+
+# uploads
+uploads/
+backend/**/uploads/
+
+# local tools
+.claude/

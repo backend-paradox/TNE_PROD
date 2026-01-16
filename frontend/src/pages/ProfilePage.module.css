@@ -1,0 +1,1125 @@
+/* ProfilePage.module.css - Light & Airy Sidebar Layout */
+
+/* ========================================
+   Page Container & Layout
+   ======================================== */
+.pageContainer {
+  min-height: 100vh;
+  background: var(--color-gray-50);
+  display: flex;
+  position: relative;
+}
+
+/* Mobile Menu Button */
+.mobileMenuBtn {
+  display: none;
+  position: fixed;
+  top: 90px;
+  left: 16px;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.mobileMenuBtn:hover {
+  background: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+}
+
+@media (max-width: 768px) {
+  .mobileMenuBtn {
+    display: flex;
+  }
+}
+
+/* Sidebar Wrapper */
+.sidebarWrapper {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebarWrapper {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    z-index: 90;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+}
+
+/* Mobile Overlay */
+.mobileOverlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebarOpen + .mainContent::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 80;
+  }
+}
+
+/* ========================================
+   Main Content Area
+   ======================================== */
+.mainContent {
+  flex: 1;
+  padding: 24px 32px;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 70px 16px 24px;
+  }
+}
+
+/* ========================================
+   Content Card
+   ======================================== */
+.contentCard {
+  background: var(--color-white);
+  border-radius: 20px;
+  border: 1px solid var(--color-gray-200);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Section Header */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: var(--color-gray-50);
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin: 0;
+}
+
+.sectionAction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.sectionAction:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+.sectionActionSecondary {
+  background: var(--color-gray-100);
+  color: var(--color-gray-500);
+  box-shadow: none;
+}
+
+.sectionActionSecondary:hover {
+  background: var(--color-gray-200);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Section Content */
+.sectionContent {
+  padding: 24px;
+}
+
+/* ========================================
+   Personal Info - View Mode
+   ======================================== */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.infoCard {
+  padding: 16px 20px;
+  background: var(--color-gray-50);
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.infoCard:hover {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+}
+
+.infoLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-400);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.infoValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoValueEmpty {
+  color: var(--color-gray-400);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.infoLocked {
+  color: var(--color-gray-400);
+}
+
+/* ========================================
+   Personal Info - Edit Mode (Form Styles)
+   ======================================== */
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 12px;
+  font-size: 1rem;
+  color: var(--color-gray-800);
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+}
+
+.formInput::placeholder {
+  color: var(--color-gray-400);
+}
+
+.formInputDisabled {
+  background: var(--color-gray-50);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+.formHint {
+  font-size: 0.75rem;
+  color: var(--color-gray-400);
+}
+
+.formSelect {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 12px;
+  font-size: 1rem;
+  color: var(--color-gray-800);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 40px;
+}
+
+.formSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+}
+
+/* Form Actions */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btnCancel {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--color-gray-200);
+  background: white;
+  color: var(--color-gray-500);
+}
+
+.btnCancel:hover {
+  background: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+}
+
+.btnSave {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.btnSave:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+.btnSave:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   Address Cards
+   ======================================== */
+.addressList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addressCard {
+  padding: 20px;
+  border: 2px solid #f1f5f9;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.addressCard:hover {
+  border-color: var(--color-gray-200);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.addressContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.addressMain {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.addressIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.addressDetails {
+  flex: 1;
+}
+
+.addressHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.addressType {
+  font-weight: 600;
+  color: var(--color-gray-800);
+  font-size: 1rem;
+}
+
+.addressDefault {
+  font-size: 0.6875rem;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #16a34a;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.addressLine {
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+  line-height: 1.6;
+}
+
+.addressActions {
+  display: flex;
+  gap: 4px;
+}
+
+.addressActionBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.addressActionBtn:hover {
+  background: var(--color-gray-100);
+}
+
+.addressEditBtn:hover {
+  color: var(--color-primary);
+  background: rgba(13, 148, 136, 0.1);
+}
+
+.addressDeleteBtn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Add Address Button */
+.addAddressBtn {
+  width: 100%;
+  padding: 16px;
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--color-gray-400);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.addAddressBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(13, 148, 136, 0.04);
+}
+
+/* ========================================
+   Empty State
+   ======================================== */
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.emptyIcon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f5f9 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-400);
+}
+
+.emptyTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  margin-bottom: 8px;
+}
+
+.emptyText {
+  font-size: 0.9375rem;
+  color: var(--color-gray-400);
+  margin-bottom: 20px;
+}
+
+.emptyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.emptyButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+/* ========================================
+   Loading & Error States
+   ======================================== */
+.loadingContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-50);
+}
+
+.loadingContent {
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #f1f5f9;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: var(--color-gray-500);
+  font-weight: 500;
+}
+
+.errorContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-50);
+  padding: 24px;
+}
+
+.errorContent {
+  text-align: center;
+  max-width: 400px;
+}
+
+.errorIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+}
+
+.errorTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin-bottom: 8px;
+}
+
+.errorText {
+  color: var(--color-gray-500);
+  margin-bottom: 24px;
+}
+
+.errorButton {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.errorButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+/* ========================================
+   Animation Classes
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ========================================
+   Info Row Styles (for compatibility)
+   ======================================== */
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.infoRow:hover {
+  background: var(--color-gray-50);
+}
+
+.infoRow:last-child {
+  margin-bottom: 0;
+}
+
+.infoIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.infoIconCoral {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  color: var(--color-primary);
+}
+
+.infoIconTeal {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  color: #4ecdc4;
+}
+
+.infoIconBlue {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #3b82f6;
+}
+
+.infoIconGreen {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: var(--color-success);
+}
+
+.infoIconPurple {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+  color: #a855f7;
+}
+
+.infoIconAmber {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #f59e0b;
+}
+
+.infoDetails {
+  flex: 1;
+}
+
+/* ========================================
+   Tab-like Section Headers
+   ======================================== */
+.tabsContainer {
+  display: flex;
+  background: var(--color-gray-50);
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.tab {
+  flex: 1;
+  min-width: max-content;
+  padding: 16px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  border-radius: 3px 3px 0 0;
+  transition: width 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--color-primary);
+  background: rgba(13, 148, 136, 0.04);
+}
+
+.tabActive {
+  color: var(--color-primary);
+  background: white;
+}
+
+.tabActive::after {
+  width: 50%;
+}
+
+.tabContent {
+  padding: 24px;
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+.hidden {
+  display: none;
+}
+
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+/* Card variant for standalone sections */
+.card {
+  background: var(--color-white);
+  border-radius: 16px;
+  border: 1px solid var(--color-gray-200);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.card:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
+   Section Action Buttons
+   ======================================== */
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.addBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+.editSectionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--color-gray-200);
+  background: white;
+  color: var(--color-gray-500);
+}
+
+.editSectionBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(13, 148, 136, 0.04);
+}
+
+/* ========================================
+   Info Card with Icon (New Design)
+   ======================================== */
+.infoCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--color-gray-50);
+  border-radius: 14px;
+  border: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.infoCard:hover {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+}
+
+.infoCard .infoIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.infoCard .infoDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoIconPink {
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+  color: #ec4899;
+}
+
+.infoIconRed {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #ef4444;
+}
+
+.infoIconOrange {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  color: #0d9488;
+}
+
+.infoIconTeal {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  color: #14b8a6;
+}
+
+/* ========================================
+   Security Section
+   ======================================== */
+.securitySection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.securityCard {
+  background: var(--color-gray-50);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #f1f5f9;
+}
+
+.securityTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ========================================
+   Address Card (Redesigned)
+   ======================================== */
+.addressList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.addressCard {
+  padding: 20px;
+  border: 2px solid #f1f5f9;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.addressCard:hover {
+  border-color: var(--color-gray-200);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.addressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.addressType {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.addressIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.addressType span:last-of-type:not(.addressIcon):not(.defaultBadge) {
+  font-weight: 600;
+  color: var(--color-gray-800);
+  font-size: 0.9375rem;
+  text-transform: capitalize;
+}
+
+.defaultBadge {
+  font-size: 0.6875rem;
+  padding: 3px 10px;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #16a34a;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.addressActions {
+  display: flex;
+  gap: 4px;
+}
+
+.addressActionBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.addressActionBtn:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-500);
+}
+
+.addressDeleteBtn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.addressBody {
+  padding-left: 46px;
+}
+
+.addressLine {
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.addressCountry {
+  font-size: 0.875rem;
+  color: var(--color-gray-400);
+  margin: 4px 0 0 0;
+}
+
+/* ========================================
+   Empty State Button
+   ======================================== */
+.emptyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.emptyBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+}
+
+/* ========================================
+   Form Container
+   ======================================== */
+.formContainer {
+  padding: 0;
+}
+
+/* ========================================
+   Legacy Compatibility Styles
+   ======================================== */
+.headerCard,
+.contentWrapper,
+.mainGrid,
+.sidebar,
+.menuCard,
+.menuItem,
+.menuItemLeft,
+.menuIcon,
+.menuLabel,
+.menuItemRight,
+.menuBadge,
+.menuArrow,
+.statsCard,
+.statsTitle,
+.statsGrid,
+.statItem,
+.statValue,
+.statLabel,
+.progressCard,
+.progressTitle,
+.progressHeader,
+.progressPercent,
+.progressBar,
+.progressFill,
+.progressHint,
+.headerContent,
+.avatarWrapper,
+.avatar,
+.avatarButton,
+.userInfo,
+.userName,
+.userEmail,
+.memberSince,
+.editButton,
+.editButtonCancel,
+.logoutButton {
+  /* These are kept for backwards compatibility but may not be used */
+}

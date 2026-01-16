@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// CHAT SERVICE MODELS
+// ============================================
+
+// Conversation - represents a chat thread (1:1 or group)
+model Conversation {
+  id            String    @id @default(uuid())
+  type          ConversationType @default(DIRECT)
+  name          String?   // For group chats
+  description   String?   // For group chats
+  imageUrl      String?   // Group avatar
+  groupId       String?   // Link to group service if this is a group chat
+
+  createdBy     Int       // User ID who created the conversation
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Last message info for quick access
+  lastMessageId String?
+  lastMessageAt DateTime?
+
+  participants  ConversationParticipant[]
+  messages      Message[]
+
+  @@index([groupId])
+  @@index([type])
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+enum ConversationType {
+  DIRECT    // 1:1 chat
+  GROUP     // Group chat linked to group service
+  SUPPORT   // Customer support chat
+}
+
+// Conversation Participants
+model ConversationParticipant {
+  id              String    @id @default(uuid())
+  conversationId  String
+  userId          Int       // User ID from auth service
+
+  role            ParticipantRole @default(MEMBER)
+  nickname        String?   // Custom nickname in this chat
+
+  joinedAt        DateTime  @default(now())
+  leftAt          DateTime?
+
+  // Notification preferences
+  isMuted         Boolean   @default(false)
+  muteUntil       DateTime?
+
+  // Read status
+  lastReadAt      DateTime?
+  lastReadMessageId String?
+
+  // Typing indicator
+  isTyping        Boolean   @default(false)
+  typingUpdatedAt DateTime?
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+enum ParticipantRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+// Messages
+model Message {
+  id              String    @id @default(uuid())
+  conversationId  String
+  senderId        Int       // User ID
+
+  type            MessageType @default(TEXT)
+  content         String?   // Text content
+
+  // For reply/thread support
+  replyToId       String?
+  replyTo         Message?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies         Message[] @relation("MessageReplies")
+
+  // Message status
+  isEdited        Boolean   @default(false)
+  editedAt        DateTime?
+  isDeleted       Boolean   @default(false)
+  deletedAt       DateTime?
+  deletedBy       Int?      // Who deleted it
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments     MessageAttachment[]
+  reactions       MessageReaction[]
+  readReceipts    MessageReadReceipt[]
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([replyToId])
+  @@map("messages")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  AUDIO
+  VIDEO
+  LOCATION
+  SYSTEM    // System messages (user joined, left, etc.)
+}
+
+// Message Attachments
+model MessageAttachment {
+  id          String    @id @default(uuid())
+  messageId   String
+
+  type        AttachmentType
+  fileName    String
+  fileSize    Int       // In bytes
+  mimeType    String
+  url         String    // Storage URL
+  thumbnailUrl String?  // For images/videos
+
+  // For media files
+  width       Int?
+  height      Int?
+  duration    Int?      // For audio/video in seconds
+
+  createdAt   DateTime  @default(now())
+
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("message_attachments")
+}
+
+enum AttachmentType {
+  IMAGE
+  FILE
+  AUDIO
+  VIDEO
+}
+
+// Message Reactions
+model MessageReaction {
+  id          String    @id @default(uuid())
+  messageId   String
+  userId      Int
+  emoji       String    // Unicode emoji or custom emoji code
+
+  createdAt   DateTime  @default(now())
+
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("message_reactions")
+}
+
+// Message Read Receipts
+model MessageReadReceipt {
+  id          String    @id @default(uuid())
+  messageId   String
+  userId      Int
+  readAt      DateTime  @default(now())
+
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@map("message_read_receipts")
+}
+
+// User Block List
+model UserBlock {
+  id          String    @id @default(uuid())
+  blockerId   Int       // User who blocked
+  blockedId   Int       // User who is blocked
+  reason      String?
+
+  createdAt   DateTime  @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@map("user_blocks")
+}
+
+// Push Notification Tokens (for mobile)
+model PushToken {
+  id          String    @id @default(uuid())
+  userId      Int
+  token       String
+  platform    Platform
+  deviceId    String?
+
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, token])
+  @@index([userId])
+  @@map("push_tokens")
+}
+
+enum Platform {
+  WEB
+  IOS
+  ANDROID
+}

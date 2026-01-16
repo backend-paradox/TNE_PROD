@@ -1,0 +1,100 @@
+# =============================================================================
+# PROJECT ROOT .GITIGNORE
+# =============================================================================
+
+# =============================================================================
+# LARGE FILES & MEDIA
+# =============================================================================
+# Video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.flv
+*.wmv
+*.m4v
+
+# Audio files
+*.mp3
+*.wav
+*.ogg
+*.flac
+*.aac
+*.m4a
+
+# Archives
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+
+# Video directories
+frontend/public/assets/videos/
+frontend/build/assets/videos/
+
+# =============================================================================
+# DEPENDENCIES
+# =============================================================================
+node_modules/
+
+# =============================================================================
+# BUILD OUTPUTS
+# =============================================================================
+dist/
+build/
+frontend/build/
+
+# =============================================================================
+# ENVIRONMENT FILES (CRITICAL - Never commit!)
+# =============================================================================
+# Backend shared .env (contains all secrets)
+backend/.env
+
+# Frontend .env (development config)
+frontend/.env
+
+# Service-level .env files (should not exist but just in case)
+backend/*/.env
+backend/*/.env.local
+backend/*/.env.*.local
+
+# Keep .env.example files for documentation
+!*.env.example
+
+# =============================================================================
+# LOGS
+# =============================================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =============================================================================
+# IDE & OS
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# UPLOADS & GENERATED FILES
+# =============================================================================
+uploads/
+backend/**/uploads/
+
+# Local tools
+.claude/
+
+# npm audit
+*-audit.json
+
+# Windows reserved names
+nul

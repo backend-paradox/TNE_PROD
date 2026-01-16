@@ -1,0 +1,1752 @@
+/* =========================
+   CINETRIP DETAIL PAGE
+========================= */
+.cinetrip-detail-page {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* =========================
+   VIDEO MODAL
+========================= */
+.cinetrip-video-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.cinetrip-video-container {
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 16/9;
+  background-color: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cinetrip-video-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.cinetrip-video-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.cinetrip-video-close svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* =========================
+   HERO SECTION
+========================= */
+.cinetrip-hero {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+.cinetrip-hero-image-wrapper {
+  position: relative;
+  height: 400px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-hero-image-wrapper {
+    height: 550px;
+  }
+}
+
+.cinetrip-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cinetrip-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.1) 40%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Navigation Arrows */
+.cinetrip-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cinetrip-nav-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  background-color: white;
+}
+
+.cinetrip-nav-btn.prev {
+  left: 24px;
+}
+
+.cinetrip-nav-btn.next {
+  right: 24px;
+}
+
+.cinetrip-nav-btn svg {
+  width: 24px;
+  height: 24px;
+  color: #374151;
+}
+
+/* Thumbnail Strip */
+.cinetrip-thumbs {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  gap: 12px;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-thumbs {
+    display: flex;
+  }
+}
+
+.cinetrip-thumb {
+  width: 80px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  opacity: 0.7;
+  transform: scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cinetrip-thumb.active {
+  border-color: white;
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.cinetrip-thumb:hover:not(.active) {
+  opacity: 0.9;
+  transform: scale(1.05);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.cinetrip-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dots Indicator */
+.cinetrip-dots {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-dots {
+    bottom: 50px;
+  }
+}
+
+.cinetrip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cinetrip-dot.active {
+  width: 28px;
+  background-color: white;
+}
+
+/* Video Play Button */
+.cinetrip-video-play-btn {
+  position: absolute;
+  bottom: 50px;
+  right: 40px;
+  width: 56px;
+  height: 56px;
+  background-color: var(--color-primary-600);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.5);
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-video-play-btn {
+    display: flex;
+  }
+}
+
+.cinetrip-video-play-btn:hover {
+  transform: scale(1.1);
+  background-color: var(--color-primary-500);
+}
+
+.cinetrip-video-play-btn svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+  margin-left: 3px;
+}
+
+/* =========================
+   INFO CARD (Overlapping Hero)
+========================= */
+.cinetrip-info-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-info-section {
+    margin-top: -60px;
+  }
+}
+
+.cinetrip-info-card {
+  background-color: white;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-info-card {
+    padding: 40px;
+  }
+}
+
+/* Actions Row */
+.cinetrip-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.cinetrip-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: white;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.cinetrip-share-btn:hover {
+  border-color: #14b8a6;
+  color: #0d9488;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15);
+}
+
+.cinetrip-share-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cinetrip-wishlist-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.cinetrip-wishlist-btn.active {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.cinetrip-wishlist-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cinetrip-wishlist-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Title Section */
+.cinetrip-title-section {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.cinetrip-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-radius: 50px;
+  border: 1px solid #99f6e4;
+  margin-bottom: 16px;
+}
+
+.cinetrip-category-badge svg {
+  width: 18px;
+  height: 18px;
+  color: #0d9488;
+}
+
+.cinetrip-category-badge span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d9488;
+}
+
+.cinetrip-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-title {
+    font-size: 2.25rem;
+  }
+}
+
+.cinetrip-short-desc {
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Meta Info Row */
+.cinetrip-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cinetrip-meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-radius: 12px;
+  border: 1px solid #99f6e4;
+}
+
+.cinetrip-meta-badge svg {
+  width: 18px;
+  height: 18px;
+  color: #0d9488;
+}
+
+.cinetrip-meta-badge span {
+  color: #0d9488;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cinetrip-meta-badge .rating-value {
+  color: #92400e;
+  font-weight: 700;
+}
+
+.cinetrip-meta-badge .rating-count {
+  color: #78350f;
+  font-weight: 500;
+}
+
+/* CTA Section - Enquire Now */
+.cinetrip-cta-section {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.cinetrip-price-note {
+  color: #6b7280;
+  font-size: 14px;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.cinetrip-cta-btn.full-width {
+  width: 100%;
+  max-width: 400px;
+  padding: 18px 48px;
+  font-size: 18px;
+}
+
+/* Price Section (deprecated - keeping for reference) */
+.cinetrip-price-section {
+  text-align: center;
+}
+
+.cinetrip-price-wrapper {
+  margin-bottom: 24px;
+}
+
+.cinetrip-original-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cinetrip-original-price {
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-size: 20px;
+}
+
+.cinetrip-discount-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  background-color: #dcfce7;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 700;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.cinetrip-current-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cinetrip-current-price {
+  font-size: 52px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.cinetrip-price-suffix {
+  color: #6b7280;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* CTA Buttons */
+.cinetrip-cta-row,
+.cinetrip-cta-buttons-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cinetrip-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 48px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cinetrip-cta-btn.primary {
+  border: none;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: white;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.3);
+}
+
+.cinetrip-cta-btn.primary:hover {
+  box-shadow: 0 6px 28px rgba(13, 148, 136, 0.4);
+}
+
+.cinetrip-cta-btn.secondary {
+  border: 2px solid #14b8a6;
+  background-color: white;
+  color: #0d9488;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.cinetrip-cta-btn.secondary:hover {
+  background-color: #f0fdfa;
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.15);
+}
+
+/* =========================
+   TABS NAVIGATION
+========================= */
+.cinetrip-tabs-nav {
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 64px;
+  z-index: 40;
+  margin-top: 24px;
+}
+
+.cinetrip-tabs-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.cinetrip-tabs-list {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 0;
+  overflow-x: auto;
+}
+
+.cinetrip-tab-btn {
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: none;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.cinetrip-tab-btn:hover:not(.active) {
+  background-color: #e5e7eb;
+}
+
+.cinetrip-tab-btn.active {
+  background-color: var(--color-primary-600);
+  color: white;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+/* =========================
+   MAIN CONTENT AREA
+========================= */
+.cinetrip-content-area {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  scroll-margin-top: 140px;
+}
+
+.cinetrip-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-content-wrapper {
+    flex-direction: row;
+  }
+}
+
+.cinetrip-main-content {
+  flex: 1;
+}
+
+.cinetrip-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* =========================
+   CONTENT SECTIONS (Cards)
+========================= */
+.cinetrip-section {
+  background-color: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.cinetrip-section.large {
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+/* Section Headers */
+.cinetrip-section-header {
+  margin-bottom: 24px;
+}
+
+.cinetrip-section-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cinetrip-section-accent {
+  width: 6px;
+  height: 32px;
+  background: linear-gradient(180deg, #0d9488, #14b8a6);
+  border-radius: 3px;
+}
+
+.cinetrip-section-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.cinetrip-section-subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+/* Description Box */
+.cinetrip-description-box {
+  position: relative;
+  padding: 24px;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+  border-radius: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.cinetrip-description-text {
+  color: #4b5563;
+  line-height: 1.9;
+  font-size: 15px;
+  margin: 0;
+}
+
+.cinetrip-read-more-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 12px rgba(13, 148, 136, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cinetrip-read-more-btn:hover {
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4);
+}
+
+.cinetrip-read-more-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Highlights/Deliverables Grid */
+.cinetrip-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.cinetrip-highlight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cinetrip-highlight-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--color-primary-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cinetrip-highlight-icon svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-primary-600);
+}
+
+.cinetrip-highlight-text {
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Equipment Grid */
+.cinetrip-equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.cinetrip-equipment-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-radius: 12px;
+  border: 1px solid #99f6e4;
+}
+
+.cinetrip-equipment-item svg {
+  width: 20px;
+  height: 20px;
+  color: #0d9488;
+}
+
+.cinetrip-equipment-item span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0d9488;
+}
+
+/* =========================
+   PROCESS ACCORDION
+========================= */
+.cinetrip-process-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.cinetrip-process-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin-bottom: 28px;
+}
+
+.cinetrip-process-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cinetrip-process-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.cinetrip-process-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cinetrip-process-header.expanded {
+  background-color: var(--color-primary-50);
+}
+
+.cinetrip-process-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cinetrip-step-number {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: var(--color-primary-600);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.cinetrip-step-title {
+  font-weight: 600;
+  color: #111827;
+  font-size: 16px;
+}
+
+.cinetrip-process-icon {
+  width: 22px;
+  height: 22px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.cinetrip-process-content-wrapper {
+  overflow: hidden;
+}
+
+.cinetrip-process-content {
+  padding: 0 20px 20px;
+  margin-left: 58px;
+}
+
+.cinetrip-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cinetrip-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.cinetrip-activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary-500);
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+/* Contact Info */
+.cinetrip-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cinetrip-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cinetrip-contact-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background-color: var(--color-primary-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinetrip-contact-icon-wrapper svg {
+  width: 22px;
+  height: 22px;
+  color: var(--color-primary-600);
+}
+
+.cinetrip-contact-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.cinetrip-contact-value {
+  font-weight: 600;
+  color: #111827;
+  font-size: 16px;
+}
+
+/* =========================
+   INCLUSIONS TAB
+========================= */
+.cinetrip-inclusions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.cinetrip-inclusions-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cinetrip-inclusions-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinetrip-inclusions-icon-wrapper.included {
+  background-color: #dcfce7;
+}
+
+.cinetrip-inclusions-icon-wrapper.included svg {
+  width: 18px;
+  height: 18px;
+  color: #16a34a;
+}
+
+.cinetrip-inclusions-icon-wrapper.excluded {
+  background-color: #fee2e2;
+}
+
+.cinetrip-inclusions-icon-wrapper.excluded svg {
+  width: 18px;
+  height: 18px;
+  color: #dc2626;
+}
+
+.cinetrip-inclusions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cinetrip-inclusion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cinetrip-inclusion-check {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.cinetrip-inclusion-check.included {
+  color: #16a34a;
+}
+
+.cinetrip-inclusion-check.excluded {
+  color: #dc2626;
+}
+
+.cinetrip-inclusion-text {
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* =========================
+   FAQ ACCORDION
+========================= */
+.cinetrip-faq-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
+}
+
+.cinetrip-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cinetrip-faq-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cinetrip-faq-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.3s ease;
+}
+
+.cinetrip-faq-header:hover {
+  background-color: var(--color-primary-50);
+}
+
+.cinetrip-faq-header.expanded {
+  background-color: var(--color-primary-50);
+}
+
+.cinetrip-faq-question {
+  font-weight: 600;
+  color: #111827;
+  font-size: 15px;
+  padding-right: 16px;
+  transition: color 0.2s ease;
+}
+
+.cinetrip-faq-header.expanded .cinetrip-faq-question {
+  color: var(--color-primary-700);
+}
+
+.cinetrip-faq-icon {
+  width: 22px;
+  height: 22px;
+  color: #6b7280;
+  flex-shrink: 0;
+  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), color 0.3s ease;
+}
+
+.cinetrip-faq-header.expanded .cinetrip-faq-icon {
+  color: var(--color-primary-600);
+}
+
+.cinetrip-faq-content-wrapper {
+  overflow: hidden;
+  will-change: height, opacity;
+}
+
+.cinetrip-faq-content {
+  padding: 0 20px 20px;
+  will-change: transform;
+}
+
+.cinetrip-faq-answer {
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* =========================
+   REVIEWS SECTION
+========================= */
+.cinetrip-reviews-section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.cinetrip-reviews-container {
+  background-color: white;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.cinetrip-reviews-header {
+  margin-bottom: 32px;
+}
+
+.cinetrip-reviews-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.cinetrip-reviews-subtitle {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* Rating Overview */
+.cinetrip-rating-overview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-rating-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Star Breakdown */
+.cinetrip-star-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cinetrip-star-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cinetrip-star-label {
+  width: 50px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.cinetrip-star-icon {
+  width: 14px;
+  height: 14px;
+  color: #f59e0b;
+}
+
+.cinetrip-star-icon.filled {
+  fill: #f59e0b;
+}
+
+.cinetrip-star-bar-bg {
+  flex: 1;
+  height: 10px;
+  background-color: #f3f4f6;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.cinetrip-star-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #0d9488, #14b8a6);
+}
+
+.cinetrip-star-count {
+  width: 45px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: right;
+}
+
+/* Overall Rating */
+.cinetrip-overall-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border-radius: 20px;
+  border: 1px solid #99f6e4;
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.1);
+}
+
+.cinetrip-rating-number {
+  font-size: 64px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.cinetrip-rating-stars {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.cinetrip-rating-star {
+  width: 24px;
+  height: 24px;
+}
+
+.cinetrip-rating-star.filled {
+  color: #f59e0b;
+}
+
+.cinetrip-total-ratings {
+  font-size: 14px;
+  color: #0d9488;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+/* Divider */
+.cinetrip-reviews-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+  margin: 8px 0 32px;
+}
+
+/* Recent Feedbacks */
+.cinetrip-feedbacks {
+  margin-bottom: 32px;
+}
+
+.cinetrip-feedback-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cinetrip-feedback-accent {
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, #0d9488, #14b8a6);
+  border-radius: 2px;
+}
+
+.cinetrip-feedback-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-feedback-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cinetrip-feedback-card {
+  padding: 24px;
+  background-color: white;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.cinetrip-feedback-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.cinetrip-feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cinetrip-feedback-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.cinetrip-feedback-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cinetrip-feedback-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinetrip-feedback-avatar-placeholder svg {
+  width: 24px;
+  height: 24px;
+  color: #9ca3af;
+}
+
+.cinetrip-feedback-user-info {
+  flex: 1;
+}
+
+.cinetrip-feedback-username {
+  font-weight: 600;
+  color: #111827;
+  font-size: 15px;
+}
+
+.cinetrip-feedback-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.cinetrip-feedback-star {
+  width: 14px;
+  height: 14px;
+}
+
+.cinetrip-feedback-star.filled {
+  color: #f59e0b;
+}
+
+.cinetrip-feedback-comment {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Add Review Form */
+.cinetrip-add-review {
+  margin-top: 8px;
+}
+
+.cinetrip-review-form-container {
+  padding: 28px;
+  background-color: white;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.cinetrip-form-group {
+  margin-bottom: 20px;
+}
+
+.cinetrip-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.cinetrip-form-label .required {
+  color: #dc2626;
+}
+
+.cinetrip-form-label .required.primary {
+  color: var(--color-primary-600);
+}
+
+.cinetrip-rating-input {
+  display: flex;
+  gap: 4px;
+}
+
+.cinetrip-rating-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.cinetrip-rating-input-star {
+  width: 28px;
+  height: 28px;
+  transition: all 0.2s ease;
+  color: #d1d5db;
+}
+
+.cinetrip-rating-input-star.active {
+  color: #f59e0b;
+}
+
+.cinetrip-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-form-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cinetrip-form-input,
+.cinetrip-form-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+  font-family: inherit;
+}
+
+.cinetrip-form-input:focus,
+.cinetrip-form-textarea:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+.cinetrip-form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.cinetrip-submit-review-btn {
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+}
+
+.cinetrip-submit-review-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
+}
+
+/* =========================
+   RELATED SERVICES SECTION
+========================= */
+.cinetrip-related-section {
+  padding: 4rem 1rem;
+  background: linear-gradient(to bottom right, var(--color-primary-50), var(--color-primary-100), var(--color-primary-50));
+  position: relative;
+  overflow: hidden;
+}
+
+.cinetrip-related-container {
+  max-width: var(--container-max, 1280px);
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 640px) {
+  .cinetrip-related-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-related-container {
+    padding: 0 2rem;
+  }
+}
+
+/* Related Grid */
+.cinetrip-related-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .cinetrip-related-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-related-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Related Card */
+.cinetrip-related-card {
+  cursor: pointer;
+  background: var(--color-background, white);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease-out;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+}
+
+.cinetrip-related-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(20, 184, 166, 0.15);
+}
+
+/* Card Image Container */
+.cinetrip-related-card-image {
+  position: relative;
+  height: 14rem;
+  overflow: hidden;
+}
+
+.cinetrip-related-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1), filter 0.8s ease-out;
+  filter: brightness(1) saturate(1);
+}
+
+.cinetrip-related-card:hover .cinetrip-related-card-image img {
+  transform: scale(1.15);
+  filter: brightness(1.1) saturate(1.1);
+}
+
+/* Gradient Overlay */
+.cinetrip-related-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2), transparent);
+  transition: opacity 0.4s ease-out;
+}
+
+.cinetrip-related-card:hover .cinetrip-related-card-overlay {
+  opacity: 0.85;
+}
+
+/* Popular Badge */
+.cinetrip-related-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: var(--color-primary-600);
+  color: white;
+  font-size: 0.875rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease-out;
+}
+
+.cinetrip-related-card:hover .cinetrip-related-badge {
+  transform: scale(1.05);
+}
+
+.cinetrip-related-badge svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Category Badge */
+.cinetrip-related-category-badge {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  font-size: 0.875rem;
+  color: var(--color-primary-700);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease-out;
+}
+
+.cinetrip-related-card:hover .cinetrip-related-category-badge {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 1);
+}
+
+/* Card Content Overlay */
+.cinetrip-related-card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem;
+}
+
+.cinetrip-related-card-name {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-heading, sans-serif);
+}
+
+.cinetrip-related-card-tagline {
+  font-size: 0.875rem;
+  color: var(--color-primary-300);
+}
+
+/* Card Body */
+.cinetrip-related-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Trip Types */
+.cinetrip-related-trip-types {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cinetrip-related-trip-type-tag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-primary-200);
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+/* Card Footer */
+.cinetrip-related-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-gray-200, #e5e7eb);
+  margin-top: auto;
+}
+
+.cinetrip-related-price-label {
+  font-size: 0.75rem;
+  color: var(--color-gray-500, #6b7280);
+  margin-bottom: 0.25rem;
+}
+
+.cinetrip-related-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary-600);
+}
+
+.cinetrip-related-price.custom {
+  font-size: 1rem;
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.cinetrip-related-explore-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.cinetrip-related-card:hover .cinetrip-related-explore-btn {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
+}
+
+/* =========================
+   SCROLLBAR HIDE UTILITY
+========================= */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

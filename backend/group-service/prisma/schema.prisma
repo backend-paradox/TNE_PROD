@@ -1,0 +1,415 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// GROUP SERVICE MODELS
+// ============================================
+
+// Travel Group - Main entity for group trips
+model Group {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  imageUrl      String?   // Group cover image
+
+  // Trip details
+  destination   String?
+  startDate     DateTime?
+  endDate       DateTime?
+  budget        Decimal?  @db.Decimal(12, 2)
+  budgetPerPerson Decimal? @db.Decimal(12, 2)
+  currency      String    @default("INR")
+
+  // Trip status management
+  manualStartDate DateTime? @map("manual_start_date")
+  manualEndDate   DateTime? @map("manual_end_date")
+  status          GroupStatus @default(PLANNING)
+
+  // Group settings
+  type          GroupType @default(PRIVATE)
+  maxMembers    Int       @default(20)
+  isActive      Boolean   @default(true)
+  inviteCode    String?   @unique // Shareable invite code for joining
+
+  // Creator info
+  createdBy     Int       // User ID from auth service
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  members       GroupMember[]
+  invitations   GroupInvitation[]
+  itinerary     ItineraryItem[]
+  expenses      Expense[]
+  polls         Poll[]
+  announcements Announcement[]
+  joinRequests  JoinRequest[]
+
+  @@index([createdBy])
+  @@index([type])
+  @@index([startDate])
+  @@index([isActive])
+  @@map("groups")
+}
+
+enum GroupType {
+  PUBLIC    // Anyone can request to join
+  PRIVATE   // Invite only
+  SECRET    // Not visible in search
+}
+
+enum GroupStatus {
+  PLANNING   // Trip is in planning phase
+  ON_TOUR    // Trip is currently active
+  COMPLETED  // Trip has ended
+}
+
+// Group Members
+model GroupMember {
+  id          String    @id @default(uuid())
+  groupId     String
+  userId      Int       // User ID from auth service
+
+  role        MemberRole @default(MEMBER)
+  nickname    String?   // Display name in group
+
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+
+  // RSVP for the trip
+  rsvpStatus  RSVPStatus @default(PENDING)
+  rsvpAt      DateTime?
+
+  // Notification preferences
+  isMuted     Boolean   @default(false)
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+enum MemberRole {
+  OWNER     // Full control, can delete group
+  ADMIN     // Can manage members and settings
+  MODERATOR // Can manage content
+  MEMBER    // Regular member
+}
+
+enum RSVPStatus {
+  PENDING
+  GOING
+  MAYBE
+  NOT_GOING
+}
+
+// Group Invitations
+model GroupInvitation {
+  id          String    @id @default(uuid())
+  groupId     String
+
+  // Can invite by userId or email
+  invitedUserId Int?
+  invitedEmail  String?
+
+  invitedBy   Int       // User ID who sent the invitation
+  role        MemberRole @default(MEMBER)
+
+  status      InvitationStatus @default(PENDING)
+  message     String?   // Personal message with invitation
+
+  token       String    @unique @default(uuid()) // For email invitations
+  expiresAt   DateTime
+
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([invitedUserId])
+  @@index([invitedEmail])
+  @@index([token])
+  @@map("group_invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+// Itinerary Items
+model ItineraryItem {
+  id          String    @id @default(uuid())
+  groupId     String
+
+  title       String
+  description String?
+  location    String?
+  address     String?
+  latitude    Decimal?  @db.Decimal(10, 8)
+  longitude   Decimal?  @db.Decimal(11, 8)
+
+  // Timing
+  date        DateTime
+  startTime   String?   // HH:mm format
+  endTime     String?
+  duration    Int?      // In minutes
+
+  // Category
+  category    ItineraryCategory
+
+  // Booking reference (if booked through platform)
+  bookingId   String?
+
+  // Cost
+  estimatedCost Decimal? @db.Decimal(12, 2)
+  actualCost    Decimal? @db.Decimal(12, 2)
+
+  // Voting
+  isConfirmed Boolean   @default(false)
+
+  createdBy   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  votes       ItineraryVote[]
+
+  @@index([groupId])
+  @@index([date])
+  @@map("itinerary_items")
+}
+
+enum ItineraryCategory {
+  TRANSPORT     // Flights, trains, buses
+  ACCOMMODATION // Hotels, hostels
+  ACTIVITY      // Tours, experiences
+  FOOD          // Restaurants, cafes
+  SIGHTSEEING   // Attractions
+  FREE_TIME     // Leisure
+  OTHER
+}
+
+// Itinerary Voting
+model ItineraryVote {
+  id            String    @id @default(uuid())
+  itineraryItemId String
+  userId        Int
+  vote          VoteType
+
+  createdAt     DateTime  @default(now())
+
+  itineraryItem ItineraryItem @relation(fields: [itineraryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryItemId, userId])
+  @@map("itinerary_votes")
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+// Group Expenses (Split billing)
+model Expense {
+  id          String    @id @default(uuid())
+  groupId     String
+
+  title       String
+  description String?
+  category    ExpenseCategory
+
+  amount      Decimal   @db.Decimal(12, 2)
+  currency    String    @default("INR")
+  date        DateTime  @default(now())
+
+  // Who paid
+  paidBy      Int       // User ID
+
+  // Receipt/proof
+  receiptUrl  String?
+
+  // Split type
+  splitType   SplitType @default(EQUAL)
+
+  createdBy   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  splits      ExpenseSplit[]
+
+  @@index([groupId])
+  @@index([paidBy])
+  @@map("expenses")
+}
+
+enum ExpenseCategory {
+  ACCOMMODATION
+  TRANSPORT
+  FOOD
+  ACTIVITIES
+  SHOPPING
+  TIPS
+  OTHER
+}
+
+enum SplitType {
+  EQUAL       // Split equally among all members
+  EXACT       // Exact amounts specified
+  PERCENTAGE  // Percentage split
+  SHARES      // Share-based split
+}
+
+// Expense Splits
+model ExpenseSplit {
+  id          String    @id @default(uuid())
+  expenseId   String
+  userId      Int
+
+  amount      Decimal   @db.Decimal(12, 2)
+  percentage  Decimal?  @db.Decimal(5, 2)
+  shares      Int?
+
+  // Settlement tracking (per split)
+  isSettled         Boolean   @default(false) @map("is_settled")
+  settledAt         DateTime? @map("settled_at")
+  settlementMethod  String?   @map("settlement_method") @db.VarChar(50)  // e.g., "Cash", "UPI", "Bank Transfer"
+  settlementNote    String?   @map("settlement_note") @db.Text
+
+  expense     Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, userId])
+  @@map("expense_splits")
+}
+
+// Polls for group decisions
+model Poll {
+  id          String    @id @default(uuid())
+  groupId     String
+
+  question    String
+  description String?
+
+  type        PollType  @default(SINGLE_CHOICE)
+  isAnonymous Boolean   @default(false)
+
+  // Timing
+  endsAt      DateTime?
+  isClosed    Boolean   @default(false)
+
+  createdBy   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  options     PollOption[]
+
+  @@index([groupId])
+  @@map("polls")
+}
+
+enum PollType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  DATE_POLL     // For choosing dates
+}
+
+// Poll Options
+model PollOption {
+  id          String    @id @default(uuid())
+  pollId      String
+
+  text        String
+  date        DateTime? // For date polls
+
+  createdAt   DateTime  @default(now())
+
+  poll        Poll      @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes       PollVote[]
+
+  @@map("poll_options")
+}
+
+// Poll Votes
+model PollVote {
+  id          String    @id @default(uuid())
+  optionId    String
+  userId      Int
+
+  createdAt   DateTime  @default(now())
+
+  option      PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([optionId, userId])
+  @@map("poll_votes")
+}
+
+// Group Announcements
+model Announcement {
+  id          String    @id @default(uuid())
+  groupId     String
+
+  title       String
+  content     String
+  priority    AnnouncementPriority @default(NORMAL)
+
+  isPinned    Boolean   @default(false)
+
+  createdBy   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([isPinned])
+  @@map("announcements")
+}
+
+enum AnnouncementPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// Join Requests (for public groups)
+model JoinRequest {
+  id          String    @id @default(uuid())
+  groupId     String
+  userId      Int
+
+  message     String?   // Why they want to join
+  status      JoinRequestStatus @default(PENDING)
+
+  respondedBy Int?      // Admin who responded
+  respondedAt DateTime?
+
+  createdAt   DateTime  @default(now())
+
+  group       Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("join_requests")
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

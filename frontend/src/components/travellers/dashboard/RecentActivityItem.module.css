@@ -1,0 +1,44 @@
+/* RecentActivityItem.module.css - Light & Airy Teal Theme */
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 0.875rem;
+  border-radius: 12px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: rgba(13, 148, 136, 0.05);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.action {
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.5;
+}
+
+.action strong {
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.time {
+  font-size: 0.8125rem;
+  color: var(--color-gray-400);
+  font-weight: 500;
+}

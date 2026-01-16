@@ -1,0 +1,211 @@
+/* =========================
+   SECTION
+========================= */
+.visa-free-destinations {
+  padding: 4rem 0;
+  background: linear-gradient(to bottom right, var(--color-primary-50), var(--color-secondary-50), var(--color-primary-50));
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+}
+
+/* =========================
+   BACKGROUND DECORATIONS
+========================= */
+.visa-bg-decorations {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.visa-bg-circle {
+  position: absolute;
+  width: 24rem;
+  height: 24rem;
+  border-radius: 50%;
+  filter: blur(48px);
+}
+
+.visa-bg-circle.top-right {
+  top: 0;
+  right: 0;
+  background: var(--color-primary-500);
+}
+
+.visa-bg-circle.bottom-left {
+  bottom: 0;
+  left: 0;
+  background: var(--color-secondary-500);
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.visa-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+@media (min-width: 640px) {
+  .visa-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .visa-container {
+    padding: 0 2rem;
+  }
+}
+
+/* =========================
+   HEADER
+========================= */
+.visa-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.visa-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.visa-icon-box {
+  padding: 0.75rem;
+  border-radius: 1rem;
+  background: var(--color-primary-600);
+}
+
+.visa-icon-box svg {
+  width: 2rem;
+  height: 2rem;
+  color: white;
+}
+
+.visa-title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  font-family: var(--font-heading);
+}
+
+.visa-subtitle {
+  color: var(--color-gray-600);
+  max-width: 48rem;
+  margin: 0 auto;
+  font-size: 1.125rem;
+  font-family: var(--font-body);
+}
+
+/* =========================
+   INFO BANNER
+========================= */
+.visa-info-banner {
+  margin-top: 3rem;
+  background: var(--color-background);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--color-primary-100);
+}
+
+.visa-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--color-primary-600);
+}
+
+.visa-banner-content svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.visa-banner-text {
+  text-align: center;
+}
+
+.visa-banner-text strong {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+/* Header fade-in */
+@keyframes visa-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Icon box hover effect */
+.visa-icon-box {
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.visa-icon-box:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Background circle animations */
+.visa-bg-circle.top-right {
+  animation: visa-bg-float 20s ease-in-out infinite;
+}
+
+.visa-bg-circle.bottom-left {
+  animation: visa-bg-float 20s ease-in-out infinite reverse;
+}
+
+@keyframes visa-bg-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(1.1);
+  }
+}
+
+/* Animation utility classes */
+.visa-fade-in {
+  opacity: 0;
+  animation: visa-fade-in 0.6s ease-out forwards;
+}
+
+/* =========================
+   ACCESSIBILITY
+========================= */
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .visa-fade-in,
+  .visa-bg-circle {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .visa-icon-box {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .visa-icon-box:hover {
+    transform: none !important;
+  }
+}

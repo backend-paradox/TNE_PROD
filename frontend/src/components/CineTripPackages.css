@@ -1,0 +1,313 @@
+/* =========================
+   SECTION - TEAL GRADIENT
+========================= */
+.cinetrip {
+  padding: 5rem 1rem;
+  background: linear-gradient(to bottom right, var(--color-primary-50), var(--color-primary-100), var(--color-primary-50));
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+/* Subtle teal ambient glow */
+.cinetrip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(20, 184, 166, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(20, 184, 166, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Top and bottom teal borders */
+.cinetrip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-top: 1px solid rgba(20, 184, 166, 0.2);
+  border-bottom: 1px solid rgba(20, 184, 166, 0.2);
+  pointer-events: none;
+}
+
+.cinetrip-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 640px) {
+  .cinetrip-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-container {
+    padding: 0 2rem;
+  }
+}
+
+/* Decorative teal lines */
+.cinetrip-container::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.6), transparent);
+}
+
+.cinetrip-container::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.4), transparent);
+}
+
+/* =========================
+   HEADER
+========================= */
+.cinetrip-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+/* Decorative teal ornaments around header */
+.cinetrip-header::before,
+.cinetrip-header::after {
+  content: '✦';
+  position: absolute;
+  top: 8px;
+  font-size: 10px;
+  color: rgba(20, 184, 166, 0.4);
+  letter-spacing: 4px;
+}
+
+.cinetrip-header::before {
+  left: calc(50% - 180px);
+  content: '✦  ✦  ✦';
+}
+
+.cinetrip-header::after {
+  right: calc(50% - 180px);
+  content: '✦  ✦  ✦';
+}
+
+.cinetrip-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gap-sm);
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.cinetrip-title h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  color: var(--color-gray-900);
+  letter-spacing: 1px;
+}
+
+.cinetrip-icon {
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.cinetrip-icon:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.cinetrip-icon svg {
+  color: var(--color-primary-600);
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 8px rgba(20, 184, 166, 0.3));
+}
+
+.cinetrip-header p {
+  max-width: 680px;
+  margin: 0 auto;
+  color: var(--color-gray-600);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+}
+
+/* Decorative line under description */
+.cinetrip-header p::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
+  margin: 1.5rem auto 0;
+}
+
+/* =========================
+   CARDS GRID - TEAL THEME
+========================= */
+.cinetrip-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-lg);
+  position: relative;
+  padding: 20px;
+  background: transparent;
+  border-radius: 20px;
+  border: none;
+}
+
+/* Grid corner decorations */
+.cinetrip-cards-grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-top: 2px solid rgba(20, 184, 166, 0.3);
+  border-left: 2px solid rgba(20, 184, 166, 0.3);
+  border-radius: 8px 0 0 0;
+  pointer-events: none;
+}
+
+.cinetrip-cards-grid::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-bottom: 2px solid rgba(20, 184, 166, 0.3);
+  border-right: 2px solid rgba(20, 184, 166, 0.3);
+  border-radius: 0 0 8px 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .cinetrip-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap-md);
+    padding: 14px;
+  }
+
+  .cinetrip-header::before,
+  .cinetrip-header::after {
+    display: none;
+  }
+
+  .cinetrip-title h3 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cinetrip-cards-grid {
+    grid-template-columns: 1fr;
+    gap: var(--gap-md);
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .cinetrip-cards-grid::before,
+  .cinetrip-cards-grid::after {
+    width: 25px;
+    height: 25px;
+  }
+
+  .cinetrip-title h3 {
+    font-size: 1.4rem;
+  }
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes cinetrip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cinetrip-fade-in {
+  opacity: 0;
+  animation: cinetrip-fade-in 0.6s ease-out forwards;
+}
+
+/* =========================
+   CTA BUTTON
+========================= */
+.cinetrip-cta-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.cinetrip-view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+}
+
+.cinetrip-view-all-btn:hover {
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
+}
+
+.cinetrip-view-all-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.cinetrip-view-all-btn:hover svg {
+  transform: translateX(4px);
+}
+
+/* =========================
+   ACCESSIBILITY
+========================= */
+@media (prefers-reduced-motion: reduce) {
+  .cinetrip-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .cinetrip-icon {
+    transition: none !important;
+  }
+
+  .cinetrip-icon:hover {
+    transform: none !important;
+  }
+}

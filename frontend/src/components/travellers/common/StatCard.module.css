@@ -1,0 +1,63 @@
+/* StatCard.module.css - Light & Airy Teal Theme */
+
+.card {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card:hover {
+  background: #ffffff;
+  border-color: rgba(13, 148, 136, 0.3);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15);
+}
+
+.iconWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.card:hover .iconWrapper {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  color: white;
+}
+
+.content {
+  width: 100%;
+}
+
+.value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin: 0 0 0.5rem 0;
+}
+
+.label {
+  font-size: 1rem;
+  color: var(--color-gray-500);
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}

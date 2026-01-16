@@ -1,0 +1,153 @@
+.card {
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 24px;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.name {
+  height: 24px;
+  width: 180px;
+  border-radius: 6px;
+}
+
+.location {
+  height: 16px;
+  width: 220px;
+  border-radius: 4px;
+}
+
+.locationSub {
+  height: 14px;
+  width: 140px;
+  border-radius: 4px;
+}
+
+.whyConnect {
+  background: rgba(13, 148, 136, 0.03);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.whyConnectHeader {
+  height: 16px;
+  width: 160px;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reason {
+  height: 28px;
+  width: 120px;
+  border-radius: 8px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  height: 32px;
+  width: 80px;
+  border-radius: 16px;
+}
+
+.languages {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.language {
+  height: 26px;
+  width: 60px;
+  border-radius: 12px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dates {
+  height: 18px;
+  width: 140px;
+  border-radius: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.button {
+  height: 44px;
+  width: 120px;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1.5rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .button {
+    width: 100%;
+  }
+}

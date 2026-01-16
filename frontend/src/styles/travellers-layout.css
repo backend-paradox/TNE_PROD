@@ -1,0 +1,53 @@
+/* Travellers Section Layout - Footer and Content Offset */
+
+/* Add padding for fixed navbar on all pages */
+main {
+  padding-top: 72px;
+}
+
+/* Travellers pages - remove extra padding, content handles its own spacing */
+.travellers-active main {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  min-height: 100vh;
+}
+
+/* When on travellers DASHBOARD routes (not landing page), offset the footer on desktop */
+@media (min-width: 1024px) {
+  .travellers-dashboard-active footer {
+    margin-left: 280px !important;
+    width: calc(100% - 280px) !important;
+    box-sizing: border-box;
+  }
+
+  /* Adjust inner containers to use full available width */
+  .travellers-dashboard-active footer > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  /* Override Tailwind max-width classes */
+  .travellers-dashboard-active footer [class*="max-w-"] {
+    max-width: 100% !important;
+  }
+}
+
+/* Ensure no horizontal scroll */
+.travellers-active {
+  overflow-x: hidden;
+}
+
+/* Prevent body scroll when mobile sheet is open */
+body.sheet-open {
+  overflow: hidden;
+}
+
+/* Mobile: Reset footer margin */
+@media (max-width: 1024px) {
+  .travellers-dashboard-active footer {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}

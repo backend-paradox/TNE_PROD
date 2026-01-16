@@ -1,0 +1,205 @@
+/* =========================
+   SECTION
+========================= */
+.package-by-duration {
+  padding: 5rem 1rem;
+  background: linear-gradient(to bottom, white, rgba(240, 253, 250, 0.3), white);
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.duration-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .duration-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .duration-container {
+    padding: 0 2rem;
+  }
+}
+
+/* =========================
+   HEADER
+========================= */
+.duration-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.duration-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.duration-icon-box {
+  background: linear-gradient(to bottom right, var(--color-primary-500), var(--color-primary-600));
+  padding: 0.75rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.duration-icon-box svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
+}
+
+.duration-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  font-family: var(--font-heading);
+}
+
+.duration-subtitle {
+  color: var(--color-gray-700);
+  font-size: 1.125rem;
+  max-width: 42rem;
+  margin: 0 auto;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-body);
+}
+
+@media (min-width: 768px) {
+  .duration-subtitle {
+    font-size: 1.25rem;
+  }
+}
+
+/* =========================
+   TABS CONTAINER
+========================= */
+.duration-tabs-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.duration-tabs {
+  display: inline-flex;
+  background: var(--color-background);
+  border: 2px solid var(--color-gray-200);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  box-shadow: var(--shadow-lg);
+}
+
+/* =========================
+   TAB BUTTON
+========================= */
+.duration-tab-btn {
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  font-weight: var(--font-weight-semibold);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-gray-700);
+}
+
+.duration-tab-btn:focus {
+  outline: none;
+}
+
+.duration-tab-btn:focus-visible {
+  outline: 2px solid var(--color-primary-400);
+  outline-offset: 2px;
+}
+
+.duration-tab-btn:hover:not(.active) {
+  color: var(--color-primary-600);
+  background: var(--color-primary-50);
+}
+
+.duration-tab-btn.active {
+  background: linear-gradient(to bottom right, var(--color-primary-500), var(--color-primary-600));
+  color: white;
+  box-shadow: var(--shadow-xl);
+  transform: scale(1.05);
+}
+
+.duration-tab-btn.active:focus-visible {
+  outline-color: var(--color-primary-500);
+}
+
+.duration-tab-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.duration-tab-content svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.duration-tab-text {
+  text-align: left;
+}
+
+.duration-tab-label {
+  font-size: 1rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.duration-tab-days {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  opacity: 0.9;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+/* Fade-in for header and tabs */
+@keyframes duration-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation utility classes */
+.duration-fade-in {
+  opacity: 0;
+  animation: duration-fade-in 0.5s ease-out forwards;
+}
+
+/* =========================
+   ACCESSIBILITY
+========================= */
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .duration-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .duration-tab-btn {
+    transition: none !important;
+  }
+
+  .duration-tab-btn.active {
+    transform: none !important;
+  }
+}

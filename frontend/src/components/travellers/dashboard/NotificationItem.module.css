@@ -1,0 +1,41 @@
+/* NotificationItem.module.css - Light & Airy Teal Theme */
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.item:hover {
+  background: rgba(13, 148, 136, 0.05);
+}
+
+.item.read {
+  opacity: 0.6;
+}
+
+.item.read .dot {
+  opacity: 0.5;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.375rem;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+}
+
+.message {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  margin: 0;
+  line-height: 1.5;
+  flex: 1;
+  font-weight: 500;
+}

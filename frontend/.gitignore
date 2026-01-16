@@ -1,0 +1,57 @@
+# =============================================================================
+# FRONTEND .GITIGNORE
+# =============================================================================
+
+# Dependencies
+node_modules/
+node_modules
+frontend/public/assets/videos/hero-thriller.mp4
+# Build outputs
+build/
+dist/
+.vite/
+
+# =============================================================================
+# ENVIRONMENT FILES (CRITICAL - Never commit!)
+# =============================================================================
+# Local development .env (contains API keys, OAuth IDs)
+.env
+
+# Any other env variants
+.env.local
+.env.*.local
+
+# Keep .env.example for documentation
+!.env.example
+
+# =============================================================================
+# LOGS
+# =============================================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =============================================================================
+# IDE & OS
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# COVERAGE & TESTING
+# =============================================================================
+coverage/
+.nyc_output/
+
+# npm audit
+*-audit.json
+
+# Local tools
+.claude/

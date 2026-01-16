@@ -1,0 +1,260 @@
+// This is your Prisma schema file
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  USER
+  VENDOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum OAuthProviderType {
+  GOOGLE
+  FACEBOOK
+  APPLE
+  TWITTER
+}
+
+enum DeviceType {
+  MOBILE
+  TABLET
+  DESKTOP
+  WEB
+  UNKNOWN
+}
+
+enum SecurityEventType {
+  PASSWORD_CHANGE
+  EMAIL_CHANGE
+  PHONE_CHANGE
+  TWO_FACTOR_ENABLED
+  TWO_FACTOR_DISABLED
+  SUSPICIOUS_LOGIN
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_SUCCESS
+  LOGIN_NEW_DEVICE
+  OAUTH_LINKED
+  OAUTH_UNLINKED
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id                   Int         @id @default(autoincrement())
+  email                String      @unique @db.VarChar(120)
+  password             String?     @db.Text // Nullable for OAuth-only users
+  name                 String      @db.VarChar(120)
+  phone                String?     @db.VarChar(20)
+  role                 UserRole    @default(USER)
+  status               UserStatus  @default(ACTIVE)
+
+  // Email verification
+  isEmailVerified      Boolean     @default(false) @map("is_email_verified")
+  emailVerificationToken String?   @unique @map("email_verification_token") @db.Text
+  emailVerificationExpires DateTime? @map("email_verification_expires") @db.Timestamptz(3)
+
+  // Phone verification
+  isPhoneVerified      Boolean     @default(false) @map("is_phone_verified")
+  phoneVerificationOtp String?     @map("phone_verification_otp") @db.VarChar(10)
+  phoneVerificationExpires DateTime? @map("phone_verification_expires") @db.Timestamptz(3)
+  phoneVerificationAttempts Int    @default(0) @map("phone_verification_attempts")
+
+  // Two-Factor Authentication
+  twoFactorEnabled     Boolean     @default(false) @map("two_factor_enabled")
+  twoFactorSecret      String?     @map("two_factor_secret") @db.Text
+  twoFactorBackupCodes Json?       @map("two_factor_backup_codes") @db.JsonB // Array of hashed backup codes
+
+  // Password reset
+  resetToken           String?     @unique @map("reset_token") @db.Text
+  resetTokenExpires    DateTime?   @map("reset_token_expires") @db.Timestamptz(3)
+
+  // Security
+  failedAttempts       Int         @default(0) @map("failed_attempts")
+  lockedUntil          DateTime?   @map("locked_until") @db.Timestamptz(3)
+  lastLogin            DateTime?   @map("last_login") @db.Timestamptz(3)
+  lastPasswordChange   DateTime?   @map("last_password_change") @db.Timestamptz(3)
+
+  // Timestamps
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt            DateTime?   @map("deleted_at") @db.Timestamptz(3)
+
+  // Relations
+  refreshTokens        RefreshToken[]
+  loginHistory         LoginHistory[]
+  oauthProviders       OAuthProvider[]
+  deviceSessions       DeviceSession[]
+  securityEvents       SecurityEvent[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([status])
+  @@index([twoFactorEnabled])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model RefreshToken {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  token           String    @unique @db.Text
+  expiresAt       DateTime  @map("expires_at") @db.Timestamptz(3)
+  isRevoked       Boolean   @default(false) @map("is_revoked")
+  revokedAt       DateTime? @map("revoked_at") @db.Timestamptz(3)
+  replacedByToken String?   @map("replaced_by_token") @db.Text
+
+  // Device info
+  userAgent       String?   @map("user_agent") @db.Text
+  ipAddress       String?   @map("ip_address") @db.VarChar(45)
+  deviceSessionId Int?      @map("device_session_id")
+
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([isRevoked])
+  @@map("refresh_tokens")
+}
+
+model LoginHistory {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  ipAddress       String    @map("ip_address") @db.VarChar(45)
+  userAgent       String?   @map("user_agent") @db.Text
+  loginStatus     String    @map("login_status") @db.VarChar(20) // SUCCESS, FAILED
+  failureReason   String?   @map("failure_reason") @db.Text
+  location        Json?     @db.JsonB
+  deviceSessionId Int?      @map("device_session_id")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([loginStatus])
+  @@map("login_history")
+}
+
+model OAuthProvider {
+  id              Int               @id @default(autoincrement())
+  userId          Int               @map("user_id")
+  provider        OAuthProviderType
+  providerId      String            @map("provider_id") @db.VarChar(255)
+
+  // OAuth tokens
+  accessToken     String?           @map("access_token") @db.Text
+  refreshToken    String?           @map("refresh_token") @db.Text
+  tokenExpires    DateTime?         @map("token_expires") @db.Timestamptz(3)
+
+  // Provider data
+  email           String?           @db.VarChar(120)
+  name            String?           @db.VarChar(120)
+  avatarUrl       String?           @map("avatar_url") @db.Text
+
+  // Timestamps
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@map("oauth_providers")
+}
+
+model DeviceSession {
+  id              Int         @id @default(autoincrement())
+  userId          Int         @map("user_id")
+
+  // Device identification
+  deviceId        String      @map("device_id") @db.VarChar(255)
+  deviceName      String?     @map("device_name") @db.VarChar(100)
+  deviceType      DeviceType  @default(UNKNOWN) @map("device_type")
+  platform        String?     @db.VarChar(50) // iOS, Android, Windows, macOS, Linux
+  browser         String?     @db.VarChar(50) // Chrome, Safari, Firefox
+  browserVersion  String?     @map("browser_version") @db.VarChar(20)
+
+  // Location
+  ipAddress       String?     @map("ip_address") @db.VarChar(45)
+  location        Json?       @db.JsonB // { city, country, timezone }
+
+  // Status
+  isActive        Boolean     @default(true) @map("is_active")
+  isTrusted       Boolean     @default(false) @map("is_trusted")
+  lastActive      DateTime    @default(now()) @map("last_active") @db.Timestamptz(3)
+
+  // Push notification token
+  pushToken       String?     @map("push_token") @db.Text
+  pushEnabled     Boolean     @default(false) @map("push_enabled")
+
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  @@index([userId])
+  @@index([deviceId])
+  @@index([isActive])
+  @@index([lastActive])
+  @@map("device_sessions")
+}
+
+model SecurityEvent {
+  id              Int               @id @default(autoincrement())
+  userId          Int               @map("user_id")
+  eventType       SecurityEventType @map("event_type")
+
+  // Event details
+  description     String?           @db.Text
+  ipAddress       String?           @map("ip_address") @db.VarChar(45)
+  userAgent       String?           @map("user_agent") @db.Text
+  location        Json?             @db.JsonB
+
+  // Additional metadata
+  metadata        Json?             @db.JsonB // { oldEmail, newEmail, deviceId, etc. }
+  severity        String            @default("INFO") @db.VarChar(20) // INFO, WARNING, CRITICAL
+
+  // Timestamps
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("security_events")
+}

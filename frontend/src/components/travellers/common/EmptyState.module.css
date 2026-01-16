@@ -1,0 +1,124 @@
+/* EmptyState.module.css - Light & Airy Teal Theme */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  border-radius: 24px;
+  color: var(--color-primary);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin: 0 0 0.75rem 0;
+}
+
+.description {
+  font-size: 1rem;
+  color: var(--color-gray-500);
+  margin: 0 0 2rem 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primaryBtn {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 0.875rem 1.75rem !important;
+  height: auto !important;
+  font-size: 1rem;
+  box-shadow: 0 6px 24px rgba(13, 148, 136, 0.3);
+  transition: all 0.3s ease;
+  border: none !important;
+  border-radius: 12px !important;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.4);
+}
+
+.secondaryBtn {
+  background: #ffffff !important;
+  color: #0d9488 !important;
+  border: 1px solid rgba(13, 148, 136, 0.3) !important;
+  font-weight: 600;
+  padding: 0.875rem 1.75rem !important;
+  height: auto !important;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border-radius: 12px !important;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background: rgba(13, 148, 136, 0.05) !important;
+  border-color: rgba(13, 148, 136, 0.5) !important;
+  color: #0f766e !important;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 3rem 1.5rem;
+    border-radius: 16px;
+  }
+
+  .iconWrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .iconWrapper svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .description {
+    font-size: 0.9375rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    width: 100%;
+  }
+}

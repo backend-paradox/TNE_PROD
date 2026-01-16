@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CineTripPackage {
+  id               String   @id @default(uuid())
+  packageId        String   @unique @map("package_id")
+  slug             String   @unique
+  name             String
+  shortDescription String   @map("short_description") @db.Text
+  longDescription  String?  @map("long_description") @db.Text
+  image            String
+  price            Decimal  @db.Decimal(10, 2)
+  priceDisplay     String   @map("price_display")
+  duration         String
+  category         String
+  features         String[]
+  deliveryTime     String?  @map("delivery_time")
+  popular          Boolean  @default(false)
+  featured         Boolean  @default(false)
+  isActive         Boolean  @default(true) @map("is_active")
+  sortOrder        Int      @default(0) @map("sort_order")
+  rating           Decimal  @default(0) @db.Decimal(2, 1)
+  reviewCount      Int      @default(0) @map("review_count")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  reviews          CineTripReview[]
+
+  @@map("cinetrip_packages")
+}
+
+model CineTripReview {
+  id              String           @id @default(uuid())
+  packageId       String           @map("package_id")
+  package         CineTripPackage  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  userId          String           @map("user_id")
+  userName        String           @map("user_name")
+  userEmail       String           @map("user_email")
+  rating          Int              // 1-5 stars
+  comment         String           @db.Text
+  helpful         Int              @default(0) // Number of users who found this helpful
+  verified        Boolean          @default(false) // Whether the user actually booked this package
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@map("cinetrip_reviews")
+  @@index([packageId])
+  @@index([userId])
+}
+
+model TourPackage {
+  id               String   @id @default(uuid())
+  packageId        String   @unique @map("package_id")
+  slug             String   @unique
+  name             String
+  destination      String
+  state            String
+  country          String   @default("India")
+  category         String
+  tagline          String
+  shortDescription String   @map("short_description") @db.Text
+  longDescription  String   @map("long_description") @db.Text
+  duration         String
+  startingPrice    Decimal  @map("starting_price") @db.Decimal(10, 2)
+  priceType        String   @default("Per Person") @map("price_type")
+  bestSeason       String?  @map("best_season")
+  difficulty       String   @default("Easy")
+  maxGroupSize     Int      @default(20) @map("max_group_size")
+  tags             String[]
+  highlights       String[]
+  inclusions       String[]
+  exclusions       String[]
+  itinerary        Json
+  faqs             Json
+  rating           Decimal  @default(0) @db.Decimal(2, 1)
+  reviewCount      Int      @default(0) @map("review_count")
+  trending         Boolean  @default(false)
+  popular          Boolean  @default(false)
+  isActive         Boolean  @default(true) @map("is_active")
+  imageUrl         String   @map("image_url")
+  galleryImages    String[] @map("gallery_images")
+  sortOrder        Int      @default(0) @map("sort_order")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // New fields for simplified database (replaces Destination table)
+  visaRequired     Boolean  @default(false) @map("visa_required")
+  continent        String?  // Asia, Europe, Middle East, Oceania, Africa (for international packages)
+
+  // Relations
+  reviews          TourPackageReview[]
+
+  @@map("tour_packages")
+}
+
+model TourPackageReview {
+  id              String      @id @default(uuid())
+  packageId       String      @map("package_id")
+  package         TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  userId          String      @map("user_id")
+  userName        String      @map("user_name")
+  userEmail       String      @map("user_email")
+  rating          Int         // 1-5 stars
+  comment         String      @db.Text
+  helpful         Int         @default(0) // Number of users who found this helpful
+  verified        Boolean     @default(false) // Whether the user actually booked this package
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("tour_package_reviews")
+  @@index([packageId])
+  @@index([userId])
+}

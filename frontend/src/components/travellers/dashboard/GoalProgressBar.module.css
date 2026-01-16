@@ -1,0 +1,54 @@
+/* GoalProgressBar.module.css - Light & Airy Teal Theme */
+
+.container {
+  margin-bottom: 1.25rem;
+}
+
+.container:last-child {
+  margin-bottom: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-gray-800);
+}
+
+.fraction {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-500);
+}
+
+.progressWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.progress {
+  flex: 1;
+  height: 8px;
+  background: var(--color-gray-200) !important;
+  border-radius: 4px;
+}
+
+.progress [data-slot="progress-indicator"] {
+  background: var(--progress-color, linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)) !important;
+  border-radius: 4px;
+}
+
+.percentage {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  min-width: 42px;
+  text-align: right;
+}

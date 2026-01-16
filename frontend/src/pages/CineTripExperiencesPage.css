@@ -1,0 +1,625 @@
+/* =========================
+   CINETRIP EXPERIENCES PAGE
+========================= */
+.cinetrip-page {
+  min-height: 100vh;
+  background-color: var(--color-gray-50);
+}
+
+/* =========================
+   SERVICES SECTION - Light Teal Theme (Matches Homepage)
+========================= */
+.cinetrip-services {
+  padding: 5rem 1rem;
+  background: linear-gradient(to bottom right, var(--color-primary-50), var(--color-primary-100), var(--color-primary-50));
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+/* Subtle teal ambient glow */
+.cinetrip-services::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(20, 184, 166, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(20, 184, 166, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Top and bottom teal borders */
+.cinetrip-services::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-top: 1px solid rgba(20, 184, 166, 0.2);
+  border-bottom: 1px solid rgba(20, 184, 166, 0.2);
+  pointer-events: none;
+}
+
+.cinetrip-services-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Decorative teal lines */
+.cinetrip-services-container::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.6), transparent);
+}
+
+.cinetrip-services-container::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.4), transparent);
+}
+
+/* Section Header - Teal Theme */
+.cinetrip-section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cinetrip-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-family: var(--font-heading);
+  color: var(--color-gray-900);
+  letter-spacing: 1px;
+}
+
+@media (min-width: 768px) {
+  .cinetrip-section-title {
+    font-size: 2.5rem;
+  }
+}
+
+.cinetrip-section-desc {
+  color: var(--color-gray-600);
+  font-size: 1rem;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+}
+
+/* Decorative line under description */
+.cinetrip-section-desc::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
+  margin: 1.5rem auto 0;
+}
+
+/* =========================
+   CATEGORY FILTER - Light Teal Theme
+========================= */
+.cinetrip-filter {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cinetrip-filter-inner {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.cinetrip-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.cinetrip-filter-btn.active {
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  color: white;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
+}
+
+.cinetrip-filter-btn:not(.active) {
+  background: transparent;
+  color: var(--color-gray-600);
+  border-color: rgba(20, 184, 166, 0.3);
+}
+
+.cinetrip-filter-btn:not(.active):hover {
+  background: rgba(20, 184, 166, 0.1);
+  color: var(--color-primary-700);
+  border-color: rgba(20, 184, 166, 0.5);
+}
+
+.cinetrip-filter-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* =========================
+   SERVICES GRID - 4 Column Teal Theme (Matches Homepage)
+========================= */
+.cinetrip-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  position: relative;
+  padding: 20px;
+  background: transparent;
+  border-radius: 20px;
+  border: none;
+  z-index: 1;
+}
+
+/* Grid corner decorations */
+.cinetrip-services-grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-top: 2px solid rgba(20, 184, 166, 0.3);
+  border-left: 2px solid rgba(20, 184, 166, 0.3);
+  border-radius: 8px 0 0 0;
+  pointer-events: none;
+}
+
+.cinetrip-services-grid::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-bottom: 2px solid rgba(20, 184, 166, 0.3);
+  border-right: 2px solid rgba(20, 184, 166, 0.3);
+  border-radius: 0 0 8px 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .cinetrip-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .cinetrip-services-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .cinetrip-services-grid::before,
+  .cinetrip-services-grid::after {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+/* Card styles are inherited from CineTripCard.css */
+
+/* =========================
+   HOW IT WORKS SECTION
+========================= */
+.cinetrip-process {
+  padding: 4rem 0;
+  background: white;
+}
+
+.cinetrip-process-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .cinetrip-process-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-process-container {
+    padding: 0 2rem;
+  }
+}
+
+.cinetrip-process-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .cinetrip-process-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-process-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Process Step */
+.cinetrip-step-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.cinetrip-step-line {
+  display: none;
+  position: absolute;
+  top: 3rem;
+  left: 60%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #5eead4, transparent);
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-step-line {
+    display: block;
+  }
+}
+
+.cinetrip-step-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  background: linear-gradient(to bottom right, #f0fdfa, #ecfeff);
+}
+
+.cinetrip-step-number {
+  position: absolute;
+  top: -1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: 0.875rem;
+  color: white;
+  background-color: #0d9488;
+}
+
+.cinetrip-step-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  background-color: #ccfbf1;
+}
+
+.cinetrip-step-icon svg {
+  width: 2rem;
+  height: 2rem;
+  color: #0d9488;
+}
+
+.cinetrip-step-title {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.cinetrip-step-desc {
+  color: var(--color-gray-600);
+  flex: 1;
+  min-height: 4.5rem;
+}
+
+/* =========================
+   TESTIMONIALS SECTION
+========================= */
+.cinetrip-testimonials {
+  padding: 4rem 0;
+  background: white;
+}
+
+.cinetrip-testimonials-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .cinetrip-testimonials-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-testimonials-container {
+    padding: 0 2rem;
+  }
+}
+
+.cinetrip-testimonials-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .cinetrip-testimonials-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.cinetrip-testimonial-card {
+  border-radius: 1rem;
+  padding: 2rem;
+  background: linear-gradient(to bottom right, #f0fdfa, #ecfeff);
+  border: 1px solid #ccfbf1;
+}
+
+.cinetrip-testimonial-quote {
+  color: var(--color-gray-700);
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.cinetrip-testimonial-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cinetrip-testimonial-name {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+}
+
+.cinetrip-testimonial-service {
+  font-size: 0.875rem;
+  color: #0d9488;
+}
+
+.cinetrip-testimonial-location {
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+/* =========================
+   CTA SECTION
+========================= */
+.cinetrip-cta {
+  position: relative;
+  padding: 3rem 0 4rem;
+  overflow: hidden;
+}
+
+.cinetrip-cta-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, var(--color-primary-600), var(--color-primary-500), var(--color-secondary-500));
+}
+
+.cinetrip-cta-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+}
+
+.cinetrip-cta-decorations {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cinetrip-cta-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  filter: blur(48px);
+}
+
+.cinetrip-cta-glow.top-left {
+  top: 2.5rem;
+  left: 2.5rem;
+  width: 16rem;
+  height: 16rem;
+}
+
+.cinetrip-cta-glow.bottom-right {
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 20rem;
+  height: 20rem;
+}
+
+.cinetrip-cta-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 640px) {
+  .cinetrip-cta-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cinetrip-cta-container {
+    padding: 0 2rem;
+  }
+}
+
+.cinetrip-cta-content {
+  text-align: center;
+}
+
+.cinetrip-cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.cinetrip-cta-icon svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
+}
+
+.cinetrip-cta h2 {
+  font-size: 1.875rem;
+  font-weight: var(--font-weight-extrabold);
+  color: white;
+  margin-bottom: 1rem;
+  font-family: var(--font-heading);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 768px) {
+  .cinetrip-cta h2 {
+    font-size: 2.75rem;
+  }
+}
+
+.cinetrip-cta-highlight {
+  color: white;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.cinetrip-cta-content p {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--font-body);
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+  .cinetrip-cta-content p {
+    font-size: 1.25rem;
+  }
+}
+
+.cinetrip-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.cinetrip-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-heading);
+  text-decoration: none;
+  box-shadow: var(--shadow-xl);
+  transition: all 0.3s ease;
+  min-width: 180px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.cinetrip-cta-btn:hover {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: var(--shadow-2xl);
+}
+
+.cinetrip-cta-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.cinetrip-cta-btn.primary {
+  background: white;
+  color: var(--color-primary);
+}
+
+.cinetrip-cta-btn.primary:hover {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.cinetrip-cta-btn.secondary {
+  background: white;
+  color: var(--color-primary);
+}
+
+.cinetrip-cta-btn.secondary:hover {
+  background: var(--gradient-primary);
+  color: white;
+}

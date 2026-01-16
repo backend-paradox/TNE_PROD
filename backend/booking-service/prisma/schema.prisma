@@ -1,0 +1,282 @@
+// Booking Service Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum BookingType {
+  HOTEL
+  FLIGHT
+  BUS
+  EVENT
+  PACKAGE
+}
+
+enum BookingStatus {
+  PENDING           // Initial creation
+  PAYMENT_PENDING   // Waiting for payment
+  PAYMENT_FAILED    // Payment failed
+  CONFIRMED         // Payment successful, booking confirmed
+  CANCELLED         // User cancelled
+  COMPLETED         // Trip/event completed
+  REFUNDED          // Refund processed
+}
+
+enum PassengerType {
+  ADULT
+  CHILD
+  INFANT
+}
+
+enum GuestType {
+  ADULT
+  CHILD
+}
+
+// Main Booking Model
+model Booking {
+  id            Int           @id @default(autoincrement())
+  bookingNumber String        @unique @map("booking_number") // TNE-HOTEL-123456
+  userId        Int           @map("user_id")
+
+  // Booking Type
+  type          BookingType
+
+  // Reference to catalog items (polymorphic)
+  hotelId       Int?          @map("hotel_id")
+  flightId      Int?          @map("flight_id")
+  busId         Int?          @map("bus_id")
+  eventId       Int?          @map("event_id")
+  packageId     String?       @map("package_id")
+
+  // Booking Details
+  status        BookingStatus @default(PENDING)
+
+  // Dates
+  bookingDate   DateTime      @default(now()) @map("booking_date")
+  travelDate    DateTime?     @map("travel_date")
+  returnDate    DateTime?     @map("return_date")
+  checkInDate   DateTime?     @map("check_in_date")
+  checkOutDate  DateTime?     @map("check_out_date")
+  eventDate     DateTime?     @map("event_date")
+
+  // Pricing
+  basePrice     Decimal       @db.Decimal(10, 2) @map("base_price")
+  taxAmount     Decimal       @default(0) @db.Decimal(10, 2) @map("tax_amount")
+  discountAmount Decimal      @default(0) @db.Decimal(10, 2) @map("discount_amount")
+  totalAmount   Decimal       @db.Decimal(10, 2) @map("total_amount")
+  currency      String        @default("INR") @db.VarChar(3)
+
+  // Payment Reference
+  paymentId     Int?          @unique @map("payment_id") // FK to payment-service
+  paymentStatus String?       @default("PENDING") @map("payment_status") @db.VarChar(50)
+
+  // Guest/Passenger Details (stored as JSON for flexibility)
+  guests        Json?         // For hotels: [{name, age, type}]
+  passengers    Json?         // For flights/buses: [{name, age, type, seatNumber}]
+  attendees     Json?         // For events: [{name, email, phone}]
+
+  // Additional Details
+  specialRequests String?     @map("special_requests") @db.Text
+  notes         String?       @db.Text
+
+  // Contact Information (can differ from user profile)
+  contactName   String        @map("contact_name") @db.VarChar(120)
+  contactEmail  String        @map("contact_email") @db.VarChar(120)
+  contactPhone  String        @map("contact_phone") @db.VarChar(20)
+
+  // Cancellation
+  cancelledAt   DateTime?     @map("cancelled_at")
+  cancelledBy   Int?          @map("cancelled_by") // User ID who cancelled
+  cancellationReason String?  @map("cancellation_reason") @db.Text
+  refundAmount  Decimal?      @db.Decimal(10, 2) @map("refund_amount")
+  refundStatus  String?       @map("refund_status") @db.VarChar(50)
+
+  // Confirmation
+  confirmedAt   DateTime?     @map("confirmed_at")
+  confirmationCode String?    @unique @map("confirmation_code") // ABC123XYZ
+
+  // Timestamps
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  hotelBooking  HotelBooking?
+  flightBooking FlightBooking?
+  reviews       BookingReview[]
+
+  @@index([userId])
+  @@index([bookingNumber])
+  @@index([status])
+  @@index([type])
+  @@index([paymentId])
+  @@map("bookings")
+}
+
+// Hotel-specific booking details
+model HotelBooking {
+  id            Int       @id @default(autoincrement())
+  bookingId     Int       @unique @map("booking_id")
+  booking       Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  // Hotel Details
+  hotelId       Int       @map("hotel_id")
+  roomType      String    @map("room_type") @db.VarChar(100)
+  numberOfRooms Int       @default(1) @map("number_of_rooms")
+  numberOfGuests Int      @map("number_of_guests")
+  numberOfNights Int      @map("number_of_nights")
+
+  // Amenities & Services
+  mealsIncluded Boolean   @default(false) @map("meals_included")
+  mealPlan      String?   @map("meal_plan") @db.VarChar(50) // EP, CP, MAP, AP
+  extraBeds     Int       @default(0) @map("extra_beds")
+
+  // Room Details
+  roomNumbers   Json?     @map("room_numbers") // Assigned at check-in
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([hotelId])
+  @@map("hotel_bookings")
+}
+
+// Flight-specific booking details
+model FlightBooking {
+  id            Int       @id @default(autoincrement())
+  bookingId     Int       @unique @map("booking_id")
+  booking       Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  // Flight Details
+  flightId      Int       @map("flight_id")
+  flightNumber  String    @map("flight_number") @db.VarChar(20)
+  airline       String    @db.VarChar(100)
+
+  // Route
+  origin        String    @db.VarChar(100)
+  destination   String    @db.VarChar(100)
+  departureTime DateTime  @map("departure_time")
+  arrivalTime   DateTime  @map("arrival_time")
+
+  // Passengers
+  numberOfPassengers Int  @map("number_of_passengers")
+  adultCount    Int       @default(0) @map("adult_count")
+  childCount    Int       @default(0) @map("child_count")
+  infantCount   Int       @default(0) @map("infant_count")
+
+  // Class & Baggage
+  cabinClass    String    @map("cabin_class") @db.VarChar(50) // ECONOMY, BUSINESS, FIRST
+  baggageAllowance String @map("baggage_allowance") @db.VarChar(100)
+
+  // PNR
+  pnr           String?   @unique @db.VarChar(10) // Passenger Name Record
+
+  // Seat Details
+  seats         Json?     // [{passengerId, seatNumber, seatType}]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([flightId])
+  @@index([pnr])
+  @@map("flight_bookings")
+}
+
+// Booking Reviews (after completion)
+model BookingReview {
+  id            Int       @id @default(autoincrement())
+  bookingId     Int       @map("booking_id")
+  booking       Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  userId        Int       @map("user_id")
+  rating        Int       // 1-5
+  review        String?   @db.Text
+
+  // What was reviewed
+  serviceQuality Int?     @map("service_quality") // 1-5
+  valueForMoney Int?      @map("value_for_money") // 1-5
+  cleanliness   Int?      // 1-5 (for hotels)
+
+  isVerified    Boolean   @default(false) @map("is_verified")
+  isPublished   Boolean   @default(false) @map("is_published")
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([bookingId])
+  @@index([userId])
+  @@map("booking_reviews")
+}
+
+// Quote Requests (preserved from original)
+model Quote {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(120)
+  email         String    @db.VarChar(120)
+  phone         String    @db.VarChar(20)
+  message       String?   @db.Text
+  status        String    @default("PENDING") @db.VarChar(50) // PENDING, CONTACTED, CONVERTED, REJECTED
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([email])
+  @@map("quotes")
+}
+
+// Cart Item Model - stores user's cart items
+model CartItem {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+
+  // Package Reference
+  packageId     String    @map("package_id")       // UUID from package-service
+  packageType   String    @map("package_type") @db.VarChar(20) // 'tour' or 'cinetrip'
+
+  // Cached Package Info (for display without API call)
+  packageName   String    @map("package_name") @db.VarChar(255)
+  packageSlug   String    @map("package_slug") @db.VarChar(255)
+  packageImage  String?   @map("package_image") @db.VarChar(500)
+  packagePrice  Decimal   @map("package_price") @db.Decimal(10, 2)
+  duration      String?   @db.VarChar(100)
+
+  // Cart Details
+  quantity      Int       @default(1)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, packageId, packageType])
+  @@index([userId])
+  @@map("cart_items")
+}
+
+// Wishlist Item Model - stores user's saved/favorited packages
+model WishlistItem {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+
+  // Package Reference
+  packageId     String    @map("package_id")       // UUID from package-service
+  packageType   String    @map("package_type") @db.VarChar(20) // 'tour' or 'cinetrip'
+
+  // Cached Package Info (for display without API call)
+  packageName   String    @map("package_name") @db.VarChar(255)
+  packageSlug   String    @map("package_slug") @db.VarChar(255)
+  packageImage  String?   @map("package_image") @db.VarChar(500)
+  packagePrice  Decimal   @map("package_price") @db.Decimal(10, 2)
+  duration      String?   @db.VarChar(100)
+  destination   String?   @db.VarChar(255)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@unique([userId, packageId, packageType])
+  @@index([userId])
+  @@map("wishlist_items")
+}

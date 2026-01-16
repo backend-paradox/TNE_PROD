@@ -1,0 +1,130 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--gradient-primary-dark);
+  padding: 20px;
+}
+
+.register-card {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 500px;
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.register-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin-bottom: 8px;
+}
+
+.register-header p {
+  font-size: 14px;
+  color: var(--color-gray-500);
+}
+
+.register-form {
+  margin-bottom: 24px;
+}
+
+.role-selection {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.role-option {
+  flex: 1;
+  cursor: pointer;
+}
+
+.role-option input[type='radio'] {
+  display: none;
+}
+
+.role-card {
+  padding: 16px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.role-option input[type='radio']:checked + .role-card {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-50);
+}
+
+.role-card:hover {
+  border-color: var(--color-primary);
+}
+
+.role-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin-bottom: 4px;
+}
+
+.role-description {
+  font-size: 12px;
+  color: var(--color-gray-500);
+}
+
+.btn-block {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.register-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.register-footer p {
+  font-size: 14px;
+  color: var(--color-gray-500);
+}
+
+.register-footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.register-footer a:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    padding: 24px;
+  }
+
+  .register-header h1 {
+    font-size: 24px;
+  }
+
+  .role-selection {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Admin audit logs
+model AdminAction {
+  id          Int      @id @default(autoincrement())
+  adminId     Int      @map("admin_id")
+  action      String   // CREATE, UPDATE, DELETE, APPROVE, REJECT, etc.
+  resource    String   // USER, VENDOR, BOOKING, REVIEW, etc.
+  resourceId  Int      @map("resource_id")
+  details     Json?    // Additional details about the action
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([resource, resourceId])
+  @@index([createdAt])
+  @@map("admin_actions")
+}
+
+// System settings
+model SystemSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       Json
+  description String?
+  updatedBy   Int?     @map("updated_by")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("system_settings")
+}
+
+// Analytics snapshots (daily aggregates)
+model AnalyticsSnapshot {
+  id                    Int      @id @default(autoincrement())
+  date                  DateTime @unique @db.Date
+
+  // User metrics
+  totalUsers            Int      @default(0) @map("total_users")
+  newUsers              Int      @default(0) @map("new_users")
+  activeUsers           Int      @default(0) @map("active_users")
+
+  // Booking metrics
+  totalBookings         Int      @default(0) @map("total_bookings")
+  newBookings           Int      @default(0) @map("new_bookings")
+  cancelledBookings     Int      @default(0) @map("cancelled_bookings")
+  confirmedBookings     Int      @default(0) @map("confirmed_bookings")
+
+  // Revenue metrics
+  totalRevenue          Decimal  @default(0) @db.Decimal(12, 2) @map("total_revenue")
+  bookingRevenue        Decimal  @default(0) @db.Decimal(12, 2) @map("booking_revenue")
+  refundAmount          Decimal  @default(0) @db.Decimal(12, 2) @map("refund_amount")
+
+  // Vendor metrics
+  totalVendors          Int      @default(0) @map("total_vendors")
+  activeVendors         Int      @default(0) @map("active_vendors")
+  pendingVendors        Int      @default(0) @map("pending_vendors")
+
+  // Review metrics
+  totalReviews          Int      @default(0) @map("total_reviews")
+  newReviews            Int      @default(0) @map("new_reviews")
+  averageRating         Float    @default(0) @map("average_rating")
+
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@index([date])
+  @@map("analytics_snapshots")
+}
+
+// Platform notifications
+model PlatformNotification {
+  id        Int       @id @default(autoincrement())
+  type      String    // ALERT, WARNING, INFO, SUCCESS
+  title     String
+  message   String    @db.Text
+  severity  String    // HIGH, MEDIUM, LOW
+  isRead    Boolean   @default(false) @map("is_read")
+  readBy    Int?      @map("read_by")
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("platform_notifications")
+}
+
+// ============================================
+// CATALOG DATA (Source of truth for chatbot)
+// ============================================
+
+// Travel destinations
+model Destination {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  country     String    @default("India")
+  state       String?
+  description String?   @db.Text
+  imageUrl    String?   @map("image_url")
+  highlights  Json?     // ["Beaches", "Nightlife", "Water Sports"]
+  bestTime    String?   @map("best_time") // "October to March"
+  isActive    Boolean   @default(true) @map("is_active")
+  sortOrder   Int       @default(0) @map("sort_order")
+  packages    Package[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("destinations")
+}
+
+// Travel packages
+model Package {
+  id            Int         @id @default(autoincrement())
+  packageId     String      @unique @map("package_id") // PKG_GOA_001
+  destinationId Int         @map("destination_id")
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  // Basic info
+  title         String
+  description   String?     @db.Text
+  duration      String      // "4N/5D"
+  durationNights Int        @default(0) @map("duration_nights")
+  durationDays  Int         @default(0) @map("duration_days")
+
+  // Trip type
+  tripType      String      @map("trip_type") // leisure, family, honeymoon, adventure, pilgrimage
+
+  // Pricing
+  price         Decimal     @db.Decimal(10, 2)
+  discountPrice Decimal?    @db.Decimal(10, 2) @map("discount_price")
+  currency      String      @default("INR")
+  pricePerPerson Boolean    @default(true) @map("price_per_person")
+
+  // Details (JSON fields)
+  highlights    Json        // ["Beach", "Cruise", "Sightseeing"]
+  inclusions    Json?       // ["Flights", "Hotels", "Meals", "Transfers"]
+  exclusions    Json?       // ["Personal expenses", "Tips"]
+  itinerary     Json?       // [{ day: 1, title: "Arrival", activities: [...] }]
+
+  // Media
+  imageUrl      String?     @map("image_url")
+  images        Json?       // Array of image URLs
+
+  // Availability
+  isActive      Boolean     @default(true) @map("is_active")
+  availability  Int         @default(10) // slots available
+  minTravelers  Int         @default(1) @map("min_travelers")
+  maxTravelers  Int         @default(20) @map("max_travelers")
+
+  // Metadata
+  rating        Float       @default(0)
+  reviewCount   Int         @default(0) @map("review_count")
+  bookingCount  Int         @default(0) @map("booking_count")
+  featured      Boolean     @default(false)
+  sortOrder     Int         @default(0) @map("sort_order")
+
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@index([packageId])
+  @@index([destinationId])
+  @@index([tripType])
+  @@index([price])
+  @@index([isActive])
+  @@index([featured])
+  @@map("packages")
+}

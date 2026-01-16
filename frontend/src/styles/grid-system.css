@@ -1,0 +1,233 @@
+/* ============================================
+   GRID SYSTEM UTILITIES
+   Reusable grid classes for consistent layouts
+   ============================================ */
+
+/* Base Grid Classes */
+.grid {
+  display: grid;
+}
+
+/* Column Templates */
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ============================================
+   GAP UTILITIES
+   ============================================ */
+
+/* Fixed Gap Sizes (using design tokens) */
+.gap-xs {
+  gap: var(--spacing-2); /* 8px */
+}
+
+.gap-sm {
+  gap: var(--spacing-3); /* 16px */
+}
+
+.gap-md {
+  gap: var(--spacing-4); /* 24px */
+}
+
+.gap-lg {
+  gap: var(--spacing-6); /* 32px */
+}
+
+.gap-xl {
+  gap: var(--spacing-8); /* 40px */
+}
+
+/* Responsive Gap - adjusts automatically */
+.gap-responsive {
+  gap: var(--spacing-6); /* 32px desktop */
+}
+
+@media (max-width: 768px) {
+  .gap-responsive {
+    gap: var(--spacing-4); /* 24px tablet */
+  }
+}
+
+@media (max-width: 480px) {
+  .gap-responsive {
+    gap: var(--spacing-3); /* 16px mobile */
+  }
+}
+
+/* ============================================
+   RESPONSIVE GRID PATTERNS
+   Most commonly used - combines cols + gaps
+   ============================================ */
+
+/* 4-Column Responsive Grid */
+.grid-responsive-4 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-3); /* 16px mobile */
+}
+
+@media (min-width: 480px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4); /* 24px tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-6); /* 32px desktop */
+  }
+}
+
+/* 3-Column Responsive Grid */
+.grid-responsive-3 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-3); /* 16px mobile */
+}
+
+@media (min-width: 480px) {
+  .grid-responsive-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4); /* 24px tablet */
+  }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive-3 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-6); /* 32px desktop */
+  }
+}
+
+/* 2-Column Responsive Grid */
+.grid-responsive-2 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-3); /* 16px mobile */
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4); /* 24px tablet */
+  }
+}
+
+/* ============================================
+   ALIGNMENT UTILITIES
+   ============================================ */
+
+/* Item Alignment (vertical) */
+.items-start {
+  align-items: start;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-end {
+  align-items: end;
+}
+
+.items-stretch {
+  align-items: stretch;
+}
+
+/* Content Justification (horizontal) */
+.justify-start {
+  justify-content: start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: end;
+}
+
+.justify-stretch {
+  justify-content: stretch;
+}
+
+/* ============================================
+   SEMANTIC COMPONENT PRESETS
+   High-level patterns for common use cases
+   ============================================ */
+
+/* Destination Grid - For destination/package cards (4-column responsive) */
+/* Unified with DestinationsPage grid breakpoints */
+.destination-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem; /* 24px mobile */
+}
+
+@media (min-width: 768px) {
+  .destination-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .destination-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .destination-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Feature Grid - For feature sections (3-column responsive) */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-3); /* 16px mobile */
+}
+
+@media (min-width: 480px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4); /* 24px tablet */
+  }
+}
+
+@media (min-width: 768px) {
+  .feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-6); /* 32px desktop */
+  }
+}
+
+/* Stats Grid - For stats/quick info (2-4 col responsive) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3); /* 16px mobile */
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-6); /* 32px desktop */
+  }
+}
