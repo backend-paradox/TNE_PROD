@@ -137,8 +137,8 @@ services:
   auth-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/auth-service:${IMAGE_TAG:-latest}
     build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: auth-service/Dockerfile
     container_name: tne-auth-prod
     restart: always
     environment:
@@ -178,8 +178,8 @@ services:
   user-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/user-service:${IMAGE_TAG:-latest}
     build:
-      context: ./user-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: user-service/Dockerfile
     container_name: tne-user-prod
     restart: always
     environment:
@@ -188,7 +188,7 @@ services:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       AUTH_SERVICE_URL: http://auth-service:3001
-      GROUP_SERVICE_URL: http://group-service:3006
+      GROUP_SERVICE_URL: http://group-service:3008
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -216,8 +216,8 @@ services:
   booking-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/booking-service:${IMAGE_TAG:-latest}
     build:
-      context: ./booking-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: booking-service/Dockerfile
     container_name: tne-booking-prod
     restart: always
     environment:
@@ -254,8 +254,8 @@ services:
   payment-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/payment-service:${IMAGE_TAG:-latest}
     build:
-      context: ./payment-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: payment-service/Dockerfile
     container_name: tne-payment-prod
     restart: always
     environment:
@@ -300,17 +300,17 @@ services:
   group-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/group-service:${IMAGE_TAG:-latest}
     build:
-      context: ./group-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: group-service/Dockerfile
     container_name: tne-group-prod
     restart: always
     environment:
       NODE_ENV: production
-      PORT: 3006
+      PORT: 3008
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       USER_SERVICE_URL: http://user-service:3002
-      CHAT_SERVICE_URL: http://chat-service:3008
+      CHAT_SERVICE_URL: http://chat-service:3009
       BOOKING_SERVICE_URL: http://booking-service:3004
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       KAFKA_BROKERS: kafka:29092
@@ -325,7 +325,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3006/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3008/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -343,8 +343,8 @@ services:
   notification-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/notification-service:${IMAGE_TAG:-latest}
     build:
-      context: ./notification-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: notification-service/Dockerfile
     container_name: tne-notification-prod
     restart: always
     environment:
@@ -399,17 +399,17 @@ services:
   chat-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/chat-service:${IMAGE_TAG:-latest}
     build:
-      context: ./chat-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: chat-service/Dockerfile
     container_name: tne-chat-prod
     restart: always
     environment:
       NODE_ENV: production
-      PORT: 3008
+      PORT: 3009
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       USER_SERVICE_URL: http://user-service:3002
-      GROUP_SERVICE_URL: http://group-service:3006
+      GROUP_SERVICE_URL: http://group-service:3008
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       # Redis for WebSocket pub/sub and session storage
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
@@ -442,8 +442,8 @@ services:
   crmsync-service:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/crmsync-service:${IMAGE_TAG:-latest}
     build:
-      context: ./crmsync-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: crmsync-service/Dockerfile
     container_name: tne-crmsync-prod
     restart: always
     environment:
@@ -455,7 +455,7 @@ services:
       USER_SERVICE_URL: http://user-service:3002
       BOOKING_SERVICE_URL: http://booking-service:3004
       PAYMENT_SERVICE_URL: http://payment-service:3005
-      GROUP_SERVICE_URL: http://group-service:3006
+      GROUP_SERVICE_URL: http://group-service:3008
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -486,8 +486,8 @@ services:
   api-gateway:
     image: ${DOCKER_REGISTRY:-ghcr.io}/tne/api-gateway:${IMAGE_TAG:-latest}
     build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: tne-gateway-prod
     restart: always
     environment:
@@ -500,9 +500,9 @@ services:
       USER_SERVICE_URL: http://user-service:3002
       BOOKING_SERVICE_URL: http://booking-service:3004
       PAYMENT_SERVICE_URL: http://payment-service:3005
-      GROUP_SERVICE_URL: http://group-service:3006
+      GROUP_SERVICE_URL: http://group-service:3008
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
-      CHAT_SERVICE_URL: http://chat-service:3008
+      CHAT_SERVICE_URL: http://chat-service:3009
       CRMSYNC_SERVICE_URL: http://crmsync-service:3011
       # Gateway Settings
       UPSTREAM_TIMEOUT_MS: ${UPSTREAM_TIMEOUT_MS:-30000}
@@ -554,9 +554,10 @@ services:
         VITE_RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
     container_name: tne-frontend-prod
     restart: always
-    ports:
-      - "${FRONTEND_PORT:-80}:80"
-      - "${FRONTEND_SSL_PORT:-443}:443"
+    # Don't expose ports directly - let host nginx proxy to this container
+    # Frontend nginx runs on port 80 inside container, accessible via docker network
+    expose:
+      - "80"
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -657,196 +658,4 @@ networks:
     internal: true
   tne-external:
     driver: bridge
-services:
-
-  # --------------------
-  # Infrastructure
-  # --------------------
-
-  postgres:
-    image: postgres:15-alpine
-    container_name: tne_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  redis:
-    image: redis:7-alpine
-    container_name: tne_redis
-    restart: always
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    ports:
-      - "6379:6379"
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: tne_zookeeper
-    restart: always
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: tne_kafka
-    restart: always
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-  # --------------------
-  # Core API Gateway
-  # --------------------
-
-  api-gateway:
-    image: ghcr.io/tne/api-gateway:latest
-    build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
-    container_name: tne_api_gateway
-    restart: always
-    env_file: .env
-    ports:
-      - "5000:5000"
-    depends_on:
-      - redis
-      - kafka
-      - postgres
-
-  # --------------------
-  # Auth Service
-  # --------------------
-
-  auth-service:
-    image: ghcr.io/tne/auth-service:latest
-    build:
-      context: .
-      dockerfile: auth-service/Dockerfile
-    container_name: tne_auth_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - postgres
-      - redis
-
-  # --------------------
-  # User Service
-  # --------------------
-
-  user-service:
-    image: ghcr.io/tne/user-service:latest
-    build:
-      context: .
-      dockerfile: user-service/Dockerfile
-    container_name: tne_user_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - postgres
-      - redis
-
-  # --------------------
-  # Booking Service
-  # --------------------
-
-  booking-service:
-    image: ghcr.io/tne/booking-service:latest
-    build:
-      context: .
-      dockerfile: booking-service/Dockerfile
-    container_name: tne_booking_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - postgres
-      - kafka
-
-  # --------------------
-  # Payment Service
-  # --------------------
-
-  payment-service:
-    image: ghcr.io/tne/payment-service:latest
-    build:
-      context: .
-      dockerfile: payment-service/Dockerfile
-    container_name: tne_payment_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - postgres
-
-  # --------------------
-  # Notification Service
-  # --------------------
-
-  notification-service:
-    image: ghcr.io/tne/notification-service:latest
-    build:
-      context: .
-      dockerfile: notification-service/Dockerfile
-    container_name: tne_notification_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - redis
-
-  # --------------------
-  # Group Service
-  # --------------------
-
-  group-service:
-    image: ghcr.io/tne/group-service:latest
-    build:
-      context: .
-      dockerfile: group-service/Dockerfile
-    container_name: tne_group_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - postgres
-
-  # --------------------
-  # Chat Service
-  # --------------------
-
-  chat-service:
-    image: ghcr.io/tne/chat-service:latest
-    build:
-      context: .
-      dockerfile: chat-service/Dockerfile
-    container_name: tne_chat_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - redis
-
-  # --------------------
-  # CRM Sync Service
-  # --------------------
-
-  crmsync-service:
-    image: ghcr.io/tne/crmsync-service:latest
-    build:
-      context: .
-      dockerfile: crmsync-service/Dockerfile
-    container_name: tne_crmsync_service
-    restart: always
-    env_file: .env
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
 

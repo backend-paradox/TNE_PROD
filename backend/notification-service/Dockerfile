@@ -1,47 +1,53 @@
-# ==============================================================================
-# TNE Notification Service - Dockerfile
-# ==============================================================================
-
-FROM node:18-alpine AS builder
+# Multi-stage build for Notification Service
+FROM node:20-alpine AS builder
 
 WORKDIR /app
+
+# Copy shared utilities
+COPY shared/ ./shared/
+
+# Copy notification-service files
+COPY notification-service/package*.json ./notification-service/
+COPY notification-service/prisma ./notification-service/prisma/
 
 # Install dependencies
-COPY package*.json ./
+WORKDIR /app/notification-service
 RUN npm ci --only=production
 
-# Copy Prisma schema and generate client
-COPY prisma ./prisma/
+# Generate Prisma Client
 RUN npx prisma generate
 
-# ==============================================================================
-# Production image
-# ==============================================================================
-FROM node:18-alpine
+# Production stage
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Install wget for health checks
-RUN apk add --no-cache wget
+# Install dumb-init and wget for health checks
+RUN apk add --no-cache dumb-init wget
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
 # Copy from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
+COPY --from=builder --chown=nodejs:nodejs /app/notification-service/node_modules ./notification-service/node_modules
+COPY --chown=nodejs:nodejs notification-service/ ./notification-service/
 
-# Copy application code
-COPY . .
+WORKDIR /app/notification-service
 
 # Create logs directory
-RUN mkdir -p logs
+RUN mkdir -p logs && chown -R nodejs:nodejs logs
 
-# Set environment
-ENV NODE_ENV=production
-ENV PORT=3007
+# Switch to non-root user
+USER nodejs
 
+# Expose port
 EXPOSE 3007
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3007/health || exit 1
 
+# Start the service
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "src/server.js"]
