@@ -111,16 +111,33 @@ services:
     ports:
       - "3011:3011"
 
+  package-service:
+    build:
+      context: ./backend
+      dockerfile: package-service/Dockerfile
+    container_name: tne_package_service
+    env_file: .env
+    environment:
+      PORT: 3012
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    depends_on:
+      - postgres
+    ports:
+      - "3012:3012"
+
   api-gateway:
     build:
       context: ./backend
       dockerfile: api-gateway/Dockerfile
     container_name: tne_api_gateway
     env_file: .env
+    environment:
+      PACKAGE_SERVICE_URL: http://package-service:3012
     depends_on:
       - auth-service
       - user-service
       - booking-service
+      - package-service
     ports:
       - "5000:5000"
 

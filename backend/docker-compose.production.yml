@@ -486,6 +486,36 @@ services:
         reservations:
           memory: 256M
 
+  # Package Service - Tour & CineTrip Packages
+  package-service:
+    build:
+      context: ./backend
+      dockerfile: package-service/Dockerfile
+    container_name: tne-package-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3012
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tne-internal
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
   # ==========================================================================
   # API GATEWAY
   # ==========================================================================
@@ -510,6 +540,7 @@ services:
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
       CHAT_SERVICE_URL: http://chat-service:3009
       CRMSYNC_SERVICE_URL: http://crmsync-service:3011
+      PACKAGE_SERVICE_URL: http://package-service:3012
       # Gateway Settings
       UPSTREAM_TIMEOUT_MS: ${UPSTREAM_TIMEOUT_MS:-30000}
       UPSTREAM_RETRY: ${UPSTREAM_RETRY:-3}
@@ -530,6 +561,7 @@ services:
       - notification-service
       - chat-service
       - crmsync-service
+      - package-service
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
       interval: 30s
