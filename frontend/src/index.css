@@ -2045,6 +2045,7 @@
 
 html {
   font-size: var(--font-size);
+  overflow-x: hidden;
 }
 
 @property --tw-translate-x {

@@ -188,18 +188,109 @@ export function Navbar() {
         {/* Mobile Menu */}
         <AnimatePresence>
           {menuOpen && (
-            <motion.div
-              className="mobile-menu"
-              initial={{ height: 0 }}
-              animate={{ height: 'auto' }}
-              exit={{ height: 0 }}
-            >
+            <>
+              {/* Backdrop overlay */}
+              <motion.div
+                className="mobile-menu-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMenuOpen(false)}
+              />
+              <motion.div
+                className="mobile-menu"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  height: 'auto',
+                  opacity: 1,
+                  transition: {
+                    height: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+                    opacity: { duration: 0.2, delay: 0.1 }
+                  }
+                }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: {
+                    height: { duration: 0.25, ease: [0.4, 0, 1, 1] },
+                    opacity: { duration: 0.15 }
+                  }
+                }}
+              >
+              {/* Navigation Links */}
               {navLinks.map((link) => (
                 <Link key={link.name} to={link.href}>
                   <link.icon /> {link.name}
                 </Link>
               ))}
+
+              {/* Auth Section Divider */}
+              <div className="mobile-menu-divider" />
+
+              {/* Auth Section */}
+              {isAuthenticated ? (
+                <>
+                  {/* User Info */}
+                  <div className="mobile-user-info">
+                    <div className="mobile-avatar">
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt={user?.name || 'User'} />
+                      ) : (
+                        <span>{initials(user?.name)}</span>
+                      )}
+                    </div>
+                    <div className="mobile-user-details">
+                      <p className="mobile-user-name">{user?.name}</p>
+                      <p className="mobile-user-email">{user?.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Account Links */}
+                  <Link to="/profile">
+                    <User /> My Profile
+                  </Link>
+                  <Link to="/my-bookings">
+                    <Briefcase /> My Bookings
+                  </Link>
+                  <Link to="/cart">
+                    <ShoppingCart /> Cart
+                    {cartItemCount > 0 && (
+                      <span className="mobile-badge">{cartItemCount}</span>
+                    )}
+                  </Link>
+                  <Link to="/wishlist">
+                    <Heart /> Wishlist
+                    {wishlist.length > 0 && (
+                      <span className="mobile-badge">{wishlist.length}</span>
+                    )}
+                  </Link>
+
+                  {/* Logout Button */}
+                  <button
+                    className="mobile-logout"
+                    onClick={async () => {
+                      await dispatch(logout()).unwrap();
+                      navigate('/');
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <LogOut /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Login & Sign Up Buttons */}
+                  <Link to="/auth?type=login" className="mobile-login-btn">
+                    <User /> Sign In
+                  </Link>
+                  <Link to="/auth?type=signup" className="mobile-signup-btn">
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </motion.div>
+            </>
           )}
         </AnimatePresence>
       </header>
