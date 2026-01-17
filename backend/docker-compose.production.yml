@@ -151,7 +151,7 @@ services:
   # Auth Service - Authentication & Authorization
   auth-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: auth-service/Dockerfile
     container_name: tne-auth-prod
     restart: always
@@ -191,7 +191,7 @@ services:
   # User Service - User Profiles, Preferences, Social Features
   user-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: user-service/Dockerfile
     container_name: tne-user-prod
     restart: always
@@ -228,7 +228,7 @@ services:
   # Booking Service - Trip, Hotel, Flight, Event Bookings
   booking-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: booking-service/Dockerfile
     container_name: tne-booking-prod
     restart: always
@@ -265,7 +265,7 @@ services:
   # Payment Service - Razorpay Integration
   payment-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: payment-service/Dockerfile
     container_name: tne-payment-prod
     restart: always
@@ -352,7 +352,7 @@ services:
   # Notification Service - Email, SMS, Push, In-App Notifications
   notification-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: notification-service/Dockerfile
     container_name: tne-notification-prod
     restart: always
@@ -407,7 +407,7 @@ services:
   # Chat Service - Real-time Messaging with WebSocket
   chat-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: chat-service/Dockerfile
     container_name: tne-chat-prod
     restart: always
@@ -449,7 +449,7 @@ services:
   # CRMSync Service - Admin Dashboard, Analytics
   crmsync-service:
     build:
-      context: .
+      context: ./backend
       dockerfile: crmsync-service/Dockerfile
     container_name: tne-crmsync-prod
     restart: always
@@ -492,7 +492,7 @@ services:
 
   api-gateway:
     build:
-      context: .
+      context: ./backend
       dockerfile: api-gateway/Dockerfile
     container_name: tne-gateway-prod
     restart: always
@@ -552,7 +552,7 @@ services:
 
   frontend:
     build:
-      context: ../frontend
+      context: ./frontend
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
