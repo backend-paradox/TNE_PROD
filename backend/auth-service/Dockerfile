@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy auth-service files
 COPY auth-service/package*.json ./auth-service/
 COPY auth-service/prisma ./auth-service/prisma/
+COPY auth-service/src ./auth-service/src/
 
 # Install dependencies
 WORKDIR /app/auth-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/auth-service/node_modules ./auth-service/node_modules
-COPY --chown=nodejs:nodejs auth-service/ ./auth-service/
+COPY --from=builder --chown=nodejs:nodejs /app/auth-service/src ./auth-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/auth-service/prisma ./auth-service/prisma
 
 WORKDIR /app/auth-service
 

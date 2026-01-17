@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy notification-service files
 COPY notification-service/package*.json ./notification-service/
 COPY notification-service/prisma ./notification-service/prisma/
+COPY notification-service/src ./notification-service/src/
 
 # Install dependencies
 WORKDIR /app/notification-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/notification-service/node_modules ./notification-service/node_modules
-COPY --chown=nodejs:nodejs notification-service/ ./notification-service/
+COPY --from=builder --chown=nodejs:nodejs /app/notification-service/src ./notification-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/notification-service/prisma ./notification-service/prisma
 
 WORKDIR /app/notification-service
 

@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy group-service files
 COPY group-service/package*.json ./group-service/
 COPY group-service/prisma ./group-service/prisma/
+COPY group-service/src ./group-service/src/
 
 # Install dependencies
 WORKDIR /app/group-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/group-service/node_modules ./group-service/node_modules
-COPY --chown=nodejs:nodejs group-service/ ./group-service/
+COPY --from=builder --chown=nodejs:nodejs /app/group-service/src ./group-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/group-service/prisma ./group-service/prisma
 
 WORKDIR /app/group-service
 

@@ -8,6 +8,7 @@ COPY shared/ ./shared/
 
 # Copy api-gateway files
 COPY api-gateway/package*.json ./api-gateway/
+COPY api-gateway/src ./api-gateway/src/
 
 # Install dependencies
 WORKDIR /app/api-gateway
@@ -27,7 +28,7 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/api-gateway/node_modules ./api-gateway/node_modules
-COPY --chown=nodejs:nodejs api-gateway/ ./api-gateway/
+COPY --from=builder --chown=nodejs:nodejs /app/api-gateway/src ./api-gateway/src
 
 WORKDIR /app/api-gateway
 

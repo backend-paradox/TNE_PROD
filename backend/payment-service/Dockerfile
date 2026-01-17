@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy payment-service files
 COPY payment-service/package*.json ./payment-service/
 COPY payment-service/prisma ./payment-service/prisma/
+COPY payment-service/src ./payment-service/src/
 
 # Install dependencies
 WORKDIR /app/payment-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/payment-service/node_modules ./payment-service/node_modules
-COPY --chown=nodejs:nodejs payment-service/ ./payment-service/
+COPY --from=builder --chown=nodejs:nodejs /app/payment-service/src ./payment-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/payment-service/prisma ./payment-service/prisma
 
 WORKDIR /app/payment-service
 

@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy chat-service files
 COPY chat-service/package*.json ./chat-service/
 COPY chat-service/prisma ./chat-service/prisma/
+COPY chat-service/src ./chat-service/src/
 
 # Install dependencies
 WORKDIR /app/chat-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/chat-service/node_modules ./chat-service/node_modules
-COPY --chown=nodejs:nodejs chat-service/ ./chat-service/
+COPY --from=builder --chown=nodejs:nodejs /app/chat-service/src ./chat-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/chat-service/prisma ./chat-service/prisma
 
 WORKDIR /app/chat-service
 

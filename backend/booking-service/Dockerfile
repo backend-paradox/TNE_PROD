@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy booking-service files
 COPY booking-service/package*.json ./booking-service/
 COPY booking-service/prisma ./booking-service/prisma/
+COPY booking-service/src ./booking-service/src/
 
 # Install dependencies
 WORKDIR /app/booking-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/booking-service/node_modules ./booking-service/node_modules
-COPY --chown=nodejs:nodejs booking-service/ ./booking-service/
+COPY --from=builder --chown=nodejs:nodejs /app/booking-service/src ./booking-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/booking-service/prisma ./booking-service/prisma
 
 WORKDIR /app/booking-service
 

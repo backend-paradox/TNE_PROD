@@ -9,6 +9,7 @@ COPY shared/ ./shared/
 # Copy crmsync-service files
 COPY crmsync-service/package*.json ./crmsync-service/
 COPY crmsync-service/prisma ./crmsync-service/prisma/
+COPY crmsync-service/src ./crmsync-service/src/
 
 # Install dependencies
 WORKDIR /app/crmsync-service
@@ -31,7 +32,8 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Copy from builder
 COPY --from=builder --chown=nodejs:nodejs /app/shared ./shared
 COPY --from=builder --chown=nodejs:nodejs /app/crmsync-service/node_modules ./crmsync-service/node_modules
-COPY --chown=nodejs:nodejs crmsync-service/ ./crmsync-service/
+COPY --from=builder --chown=nodejs:nodejs /app/crmsync-service/src ./crmsync-service/src
+COPY --from=builder --chown=nodejs:nodejs /app/crmsync-service/prisma ./crmsync-service/prisma
 
 WORKDIR /app/crmsync-service
 
