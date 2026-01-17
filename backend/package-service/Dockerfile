@@ -24,7 +24,11 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install dumb-init and OpenSSL for Prisma
-RUN apk add --no-cache dumb-init openssl1.1-compat
+RUN apk add --no-cache dumb-init openssl
+
+# Create symlink for Prisma's OpenSSL requirement (libssl.so.1.1 -> libssl.so.3)
+RUN ln -s /usr/lib/libssl.so.3 /usr/lib/libssl.so.1.1 || true && \
+    ln -s /usr/lib/libcrypto.so.3 /usr/lib/libcrypto.so.1.1 || true
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
