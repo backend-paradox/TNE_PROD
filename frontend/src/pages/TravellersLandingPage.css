@@ -53,6 +53,12 @@
   opacity: 1;
 }
 
+@media (max-width: 768px) {
+  .tl-hero-video {
+    width: 100%;
+  }
+}
+
 /* Video Overlay - Light teal gradient (reduced intensity) */
 .tl-hero-video-overlay {
   position: absolute;

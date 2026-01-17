@@ -46,6 +46,12 @@
   opacity: 1;
 }
 
+@media (max-width: 768px) {
+  .about-hero-video {
+    width: 100%;
+  }
+}
+
 .about-hero-overlay {
   position: absolute;
   inset: 0;

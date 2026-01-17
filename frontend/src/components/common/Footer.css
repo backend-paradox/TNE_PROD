@@ -5,16 +5,10 @@
   margin-top: auto;
   position: relative;
   z-index: 50;
-  width: 100vw;
-  max-width: none !important;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw !important;
-  margin-right: -50vw !important;
+  width: 100%;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4),
               0 -4px 16px rgba(13, 148, 136, 0.05);
   border-top: 1px solid rgba(13, 148, 136, 0.1);
-  overflow: visible;
 }
 
 .footer > .container {

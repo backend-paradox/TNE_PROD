@@ -45,6 +45,12 @@
   opacity: 1;
 }
 
+@media (max-width: 768px) {
+  .careers-hero-video {
+    width: 100%;
+  }
+}
+
 .careers-hero-video-overlay {
   position: absolute;
   inset: 0;

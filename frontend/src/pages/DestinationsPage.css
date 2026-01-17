@@ -55,6 +55,12 @@
   opacity: 1;
 }
 
+@media (max-width: 768px) {
+  .destinations-hero .hero__video {
+    width: 100%;
+  }
+}
+
 .destinations-hero-overlay {
   position: absolute;
   inset: 0;

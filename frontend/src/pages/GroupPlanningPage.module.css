@@ -1151,7 +1151,8 @@
   }
 
   .chatPopup {
-    width: calc(100vw - 2rem);
+    width: calc(100% - 2rem);
+    max-width: 400px;
     height: 500px;
     right: 1rem;
   }
@@ -1192,7 +1193,7 @@
   }
 
   .chatPopup {
-    width: 100vw;
+    width: 100%;
     height: 70vh;
     border-radius: 16px 16px 0 0;
   }
