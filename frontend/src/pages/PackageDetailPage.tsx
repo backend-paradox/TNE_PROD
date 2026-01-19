@@ -259,6 +259,7 @@ export function PackageDetailPage() {
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', review: '' });
   const contentRef = useRef<HTMLDivElement>(null);
+  const isDebug = import.meta.env.VITE_DEBUG === 'true';
 
   // Reviews state
   const [reviews, setReviews] = useState<TourReview[]>([]);
@@ -285,12 +286,16 @@ export function PackageDetailPage() {
 
       try {
         setLoadingReviews(true);
-        console.log(`🔄 Fetching reviews for tour package: ${slug}`);
+          if (isDebug) {
+            console.log(`🔄 Fetching reviews for tour package: ${slug}`);
+          }
 
         const { reviews: fetchedReviews, stats } = await tourPackagesAPI.getReviews(slug);
 
-        console.log(`✅ Fetched ${fetchedReviews.length} reviews for ${slug}`);
-        console.log('📊 Review stats:', stats);
+          if (isDebug) {
+            console.log(`✅ Fetched ${fetchedReviews.length} reviews for ${slug}`);
+            console.log('📊 Review stats:', stats);
+          }
 
         setReviews(fetchedReviews);
         setReviewStats(stats);
@@ -397,7 +402,14 @@ export function PackageDetailPage() {
 
     // Dispatch trip to booking state and navigate with state
     dispatch(setTrip(tripData));
-    toast.success('Proceeding to booking...', { icon: '✈️', duration: 2000 });
+    const toastId = 'proceeding-booking';
+    toast.dismiss(toastId);
+    toast.success('Proceeding to booking...', {
+      id: toastId,
+      icon: 'OK',
+      duration: 2000,
+    });
+    setTimeout(() => toast.dismiss(toastId), 2200);
     navigate('/booking', { state: { tripData } });
   };
 
@@ -489,10 +501,14 @@ export function PackageDetailPage() {
   };
 
   // Map API data to component's expected format
-  const packageData = apiPackage ? {
-    id: apiPackage.id,
-    packageId: apiPackage.packageId,
-    slug: apiPackage.slug,
+    const safeStarDistribution = reviewStats.starDistribution && Object.keys(reviewStats.starDistribution).length > 0
+      ? reviewStats.starDistribution
+      : { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    const packageData = apiPackage ? {
+      id: apiPackage.id,
+      packageId: apiPackage.packageId,
+      slug: apiPackage.slug,
     title: apiPackage.name,
     description: apiPackage.longDescription || apiPackage.shortDescription,
     shortDescription: apiPackage.shortDescription,
@@ -532,8 +548,8 @@ export function PackageDetailPage() {
       date: new Date(review.createdAt).toISOString().split('T')[0],
     })),
     ratingBreakdown: samplePackage.ratingBreakdown, // Keep for now (can be removed later)
-    starDistribution: reviewStats.starDistribution,
-    totalRatings: reviewStats.totalReviews,
+    starDistribution: safeStarDistribution,
+    totalRatings: Number(reviewStats.totalReviews) || 0,
     mapQuery: getMapSearchQuery(apiPackage.destination, apiPackage.state, apiPackage.country),
   } : null;
 
@@ -568,6 +584,13 @@ export function PackageDetailPage() {
       </div>
     );
   }
+
+  const starDistribution = packageData.starDistribution || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  const maxStarCount = Math.max(
+    1,
+    ...Object.values(starDistribution).map((value) => Number(value) || 0)
+  );
+  const totalRatings = Number(packageData.totalRatings) || 0;
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'overview', label: 'Overview' },
@@ -792,6 +815,16 @@ export function PackageDetailPage() {
 
             {/* CTA Buttons */}
             <div className="package-cta-row">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="package-cta-btn primary"
+                onClick={handleBookNow}
+              >
+                <ArrowRight size={18} />
+                Book Now
+              </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
@@ -1178,9 +1211,8 @@ export function PackageDetailPage() {
               <div className="package-star-breakdown">
                 {['FIVE', 'FOUR'].map((label, idx) => {
                   const starNum = 5 - idx;
-                  const count = packageData.starDistribution[starNum as keyof typeof packageData.starDistribution];
-                  const maxCount = Math.max(...Object.values(packageData.starDistribution));
-                  const percentage = (count / maxCount) * 100;
+                  const count = Number(starDistribution[starNum as keyof typeof starDistribution] || 0);
+                  const percentage = maxStarCount > 0 ? Math.round((count / maxStarCount) * 100) : 0;
 
                   return (
                     <div key={label} className="package-star-row">
@@ -1221,7 +1253,7 @@ export function PackageDetailPage() {
                 ))}
               </div>
               <p className="package-total-ratings">
-                {packageData.totalRatings.toLocaleString()} Ratings
+                {totalRatings.toLocaleString()} Ratings
               </p>
             </motion.div>
           </div>

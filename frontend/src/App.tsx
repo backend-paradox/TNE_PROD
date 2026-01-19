@@ -100,7 +100,8 @@ function AppContent() {
   const prevAuthRef = useRef(isAuthenticated);
   useEffect(() => {
     // Only sync when transitioning from not authenticated to authenticated
-    if (isAuthenticated && !prevAuthRef.current) {
+    const accessToken = localStorage.getItem('accessToken');
+    if (isAuthenticated && accessToken && !prevAuthRef.current) {
       dispatch(syncCartToBackend() as any);
     }
     prevAuthRef.current = isAuthenticated;

@@ -24,6 +24,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loadBookingHistory } from '../store/slices/bookingSlice';
 import { formatCurrency, formatDuration, formatDate } from '../utils';
 import { Booking, BookingStatus } from '../types';
+import axiosInstance from '../app/axios';
 import './MyBookingsPage.css';
 
 const statusConfig: Record<BookingStatus, { label: string; className: string; icon: React.ElementType }> = {
@@ -237,23 +238,15 @@ function BookingCard({ booking, index }: { booking: Booking; index: number }) {
 
     setIsDownloading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/bookings/${booking.id}/pdf`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
+      // Use axios instance which handles auth token automatically via interceptors
+      // This ensures proper token refresh if needed
+      const response = await axiosInstance.get(`/bookings/${booking.id}/pdf`, {
+        responseType: 'blob',
+        timeout: 60000, // 60 second timeout for PDF generation
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to download PDF');
-      }
-
-      const blob = await response.blob();
+      // Create blob from response data
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -264,9 +257,12 @@ function BookingCard({ booking, index }: { booking: Booking; index: number }) {
       window.URL.revokeObjectURL(url);
 
       toast.success('Itinerary downloaded successfully!');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('PDF download error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to download itinerary');
+      // Handle axios error structure
+      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = axiosError.response?.data?.message || axiosError.message || 'Failed to download itinerary';
+      toast.error(errorMessage);
     } finally {
       setIsDownloading(false);
     }

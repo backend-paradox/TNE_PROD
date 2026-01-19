@@ -79,13 +79,24 @@ class ImageLoader {
   }
 
   /**
-   * Load multiple images in parallel
+   * Load multiple images in parallel with resilience
+   * Uses Promise.allSettled so one failure doesn't block others
    * @param {string[]} urls - Array of image URLs
-   * @returns {Promise<Array<Buffer|null>>} - Array of image buffers
+   * @returns {Promise<Array<Buffer|null>>} - Array of image buffers (null for failed loads)
    */
   async loadMultiple(urls) {
     const promises = urls.map(url => this.loadFromUrl(url));
-    return await Promise.all(promises);
+    const results = await Promise.allSettled(promises);
+
+    // Extract values, returning null for rejected promises
+    return results.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      } else {
+        console.warn(`Failed to load image ${urls[index]}:`, result.reason?.message || 'Unknown error');
+        return null;
+      }
+    });
   }
 
   /**

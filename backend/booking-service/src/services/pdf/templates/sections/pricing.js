@@ -232,9 +232,10 @@ class PricingSection {
 
     currentY += 30;
 
-    // Render each milestone
+    // Render each milestone (pass total count for proper timeline rendering)
+    const totalMilestones = paymentSchedule.length;
     paymentSchedule.forEach((milestone, index) => {
-      currentY = this.renderMilestoneRow(doc, milestone, index, x, currentY, width);
+      currentY = this.renderMilestoneRow(doc, milestone, index, x, currentY, width, totalMilestones);
     });
 
     currentY += spacing.lg;
@@ -251,7 +252,7 @@ class PricingSection {
    * Render individual milestone row in payment timeline
    * @private
    */
-  static renderMilestoneRow(doc, milestone, index, x, y, width) {
+  static renderMilestoneRow(doc, milestone, index, x, y, width, totalMilestones) {
     const rowHeight = 70;
     const iconX = x + 15;
     const iconY = y + 35;
@@ -290,7 +291,8 @@ class PricingSection {
     }
 
     // Connecting line to next milestone (except for last one)
-    if (index < 3) { // Assuming max 4 milestones
+    // Use dynamic totalMilestones instead of hardcoded 4
+    if (index < totalMilestones - 1) {
       doc.moveTo(iconX, iconY + 12)
          .lineTo(iconX, y + lineHeight)
          .strokeColor(colors.gray300)
@@ -810,11 +812,11 @@ class PricingSection {
        .fill(colors.primaryLight)
        .fillOpacity(1);
 
-    // Button icon (payment symbol or checkmark)
-    doc.font(fonts.bold)
+    // Button icon (payment symbol - using ASCII-safe character)
+    doc.font('Helvetica-Bold')
        .fontSize(fontSize.h4)
        .fillColor(colors.white)
-       .text('💳', x + buttonPadding, y + buttonHeight / 2 - 8, {
+       .text('PAY', x + buttonPadding, y + buttonHeight / 2 - 8, {
          lineBreak: false
        });
 

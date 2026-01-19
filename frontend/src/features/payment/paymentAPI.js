@@ -156,8 +156,9 @@ export const initializeRazorpayPayment = async (options) => {
       try {
         // Report failure to backend
         await handlePaymentFailureAPI({
-          orderId,
-          error: response.error,
+          razorpayOrderId: orderId,
+          errorCode: response.error?.code,
+          errorDescription: response.error?.description,
         });
       } catch (e) {
         console.error('Failed to report payment failure:', e);
@@ -193,15 +194,17 @@ export const processPaymentAPI = async (bookingDetails) => {
   // Step 1: Create order
   const order = await createPaymentOrderAPI({
     bookingId,
-    amount: Math.round(amount * 100), // Convert to paise
+    amount: Number(amount),
     currency: 'INR',
     notes,
   });
 
+  const amountInPaise = order.razorpayOrderAmount || Math.round(Number(order.amount) * 100);
+
   // Step 2: Open Razorpay and process payment
   const paymentResult = await initializeRazorpayPayment({
     orderId: order.razorpayOrderId,
-    amount: order.amount,
+    amount: amountInPaise,
     currency: order.currency,
     description: `Booking #${bookingId}`,
     prefill: {

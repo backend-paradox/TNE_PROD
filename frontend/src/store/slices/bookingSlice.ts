@@ -59,9 +59,10 @@ const calculatePricingForBooking = (booking: BookingState['currentBooking']): Bo
   const { trip, travelers, promoCode } = booking;
   if (!trip) return null;
 
-  const adultTotal = travelers.adults * trip.price.adult;
-  const childTotal = travelers.children * trip.price.child;
-  const infantTotal = travelers.infants * trip.price.infant;
+  const perHeadPrice = trip.price.adult;
+  const adultTotal = travelers.adults * perHeadPrice;
+  const childTotal = travelers.children * perHeadPrice;
+  const infantTotal = travelers.infants * perHeadPrice;
   const subtotal = adultTotal + childTotal + infantTotal;
   const taxes = Math.round(subtotal * 0.18);
   const serviceFee = 999;
@@ -74,7 +75,7 @@ const calculatePricingForBooking = (booking: BookingState['currentBooking']): Bo
 
   const total = subtotal + taxes + serviceFee - discount;
   return {
-    basePrice: trip.price.adult,
+    basePrice: perHeadPrice,
     adultTotal,
     childTotal,
     infantTotal,
@@ -84,6 +85,40 @@ const calculatePricingForBooking = (booking: BookingState['currentBooking']): Bo
     discount,
     promoCode: promoCode || undefined,
     total,
+  };
+};
+
+const getDefaultTravelDate = (trip: Trip): string => {
+  if (trip.startDates && trip.startDates.length > 0) {
+    return trip.startDates[0];
+  }
+  return new Date().toISOString().slice(0, 10);
+};
+
+const calculateAge = (dateOfBirth: string): number => {
+  if (!dateOfBirth) return 0;
+  const birthDate = new Date(dateOfBirth);
+  if (Number.isNaN(birthDate.getTime())) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return Math.max(age, 0);
+};
+
+const toBackendTraveller = (traveler: Traveler) => {
+  const typeMap: Record<Traveler['type'], 'ADULT' | 'CHILD' | 'INFANT'> = {
+    adult: 'ADULT',
+    child: 'CHILD',
+    infant: 'INFANT',
+  };
+
+  return {
+    name: `${traveler.firstName} ${traveler.lastName}`.trim() || 'Traveller',
+    age: calculateAge(traveler.dateOfBirth),
+    type: typeMap[traveler.type] || 'ADULT',
   };
 };
 
@@ -119,7 +154,7 @@ export const createBooking = createAsyncThunk<any, void, { state: RootState }>(
       contactPhone: contact.phone,
       travelDate: startDate.toISOString(),
       returnDate: returnDate.toISOString(),
-      travellers: travelerDetails,
+      travellers: travelerDetails.map(toBackendTraveller),
       adultCount: travelers.adults,
       childCount: travelers.children,
       infantCount: travelers.infants,
@@ -225,7 +260,11 @@ const bookingSlice = createSlice({
   initialState,
   reducers: {
     setTrip: (state, action: PayloadAction<Trip>) => {
+      const previousTripId = state.currentBooking.trip?.id;
       state.currentBooking.trip = action.payload;
+      if (!state.currentBooking.travelDate || previousTripId !== action.payload.id) {
+        state.currentBooking.travelDate = getDefaultTravelDate(action.payload);
+      }
       state.currentBooking.pricing = calculatePricingForBooking(state.currentBooking);
     },
     setTravelDate: (state, action: PayloadAction<string>) => {
@@ -240,6 +279,9 @@ const bookingSlice = createSlice({
     },
     addTravelerDetail: (state, action: PayloadAction<Traveler>) => {
       state.currentBooking.travelerDetails.push(action.payload);
+    },
+    setTravelerDetails: (state, action: PayloadAction<Traveler[]>) => {
+      state.currentBooking.travelerDetails = action.payload;
     },
     updateTravelerDetail: (
       state,
@@ -315,6 +357,7 @@ export const {
   setTravelDate,
   setTravelers,
   addTravelerDetail,
+  setTravelerDetails,
   updateTravelerDetail,
   setContact,
   calculatePricing,

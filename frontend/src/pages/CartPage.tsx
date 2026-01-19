@@ -127,11 +127,14 @@ export function CartPage() {
     const days = durationMatch ? parseInt(durationMatch[1]) : 7;
     const nights = nightsMatch ? parseInt(nightsMatch[1]) : Math.max(days - 1, 1);
 
+    const tripId = String(item.packageId || item.id);
+    const tripSlug = item.slug || tripId;
+
     // Transform cart item to Trip format with all required fields
     const tripData = {
-      id: String(item.id),
+      id: tripId,
       title: item.name,
-      slug: item.slug || String(item.id),
+      slug: tripSlug,
       destination: item.destination || 'Multiple Destinations',
       country: 'India',
       images: [item.image],
@@ -169,7 +172,14 @@ export function CartPage() {
     };
 
     dispatch(setTrip(tripData as any));
-    toast.success(`Proceeding to book "${item.name}"...`, { icon: '✈️' });
+    const toastId = 'proceeding-booking';
+    toast.dismiss(toastId);
+    toast.success(`Proceeding to book "${item.name}"...`, {
+      id: toastId,
+      icon: 'OK',
+      duration: 2000,
+    });
+    setTimeout(() => toast.dismiss(toastId), 2200);
     navigate('/booking', { state: { tripData } });
   };
 
@@ -203,11 +213,14 @@ export function CartPage() {
     const days = durationMatch ? parseInt(durationMatch[1]) : 7;
     const nights = nightsMatch ? parseInt(nightsMatch[1]) : Math.max(days - 1, 1);
 
+    const tripId = String(firstItem.packageId || firstItem.id);
+    const tripSlug = firstItem.slug || tripId;
+
     // Transform cart item to Trip format with all required fields
     const tripData = {
-      id: String(firstItem.id),
+      id: tripId,
       title: firstItem.name,
-      slug: firstItem.slug || String(firstItem.id),
+      slug: tripSlug,
       destination: firstItem.destination || 'Multiple Destinations',
       country: 'India',
       images: [firstItem.image],
@@ -245,7 +258,14 @@ export function CartPage() {
     };
 
     dispatch(setTrip(tripData as any));
-    toast.success('Proceeding to checkout...', { icon: '🛒' });
+    const toastId = 'proceeding-checkout';
+    toast.dismiss(toastId);
+    toast.success('Proceeding to checkout...', {
+      id: toastId,
+      icon: 'OK',
+      duration: 2000,
+    });
+    setTimeout(() => toast.dismiss(toastId), 2200);
     navigate('/booking', { state: { tripData } });
   };
 

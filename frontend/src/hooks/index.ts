@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trip } from '../types';
 import { enrichedTripsData } from '../data/trips';
 import axiosInstance from '../app/axios';
+import { useAppSelector } from '../store/hooks';
 
 // Search Hook with debouncing
 export function useSearch(debounceMs: number = 300) {
@@ -269,6 +270,32 @@ export interface WishlistItem {
   createdAt: string;
 }
 
+type WishlistCache = {
+  ids: string[];
+  items: WishlistItem[];
+  userId: string | null;
+};
+
+let wishlistCache: WishlistCache = { ids: [], items: [], userId: null };
+let wishlistCacheReady = false;
+let wishlistFetchPromise: Promise<void> | null = null;
+
+const setWishlistCache = (ids: string[], items: WishlistItem[], userId: string | null) => {
+  wishlistCache = { ids, items, userId };
+  wishlistCacheReady = true;
+};
+
+const resetWishlistCache = () => {
+  wishlistCache = { ids: [], items: [], userId: null };
+  wishlistCacheReady = false;
+  wishlistFetchPromise = null;
+};
+
+const getAccessToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('accessToken');
+};
+
 const WISHLIST_KEY = 'travel-wishlist';
 const WISHLIST_ITEMS_KEY = 'travel-wishlist-items';
 
@@ -310,10 +337,6 @@ function setStoredWishlistItems(items: WishlistItem[]): void {
   }
 }
 
-function isLoggedIn(): boolean {
-  return !!localStorage.getItem('accessToken');
-}
-
 export function useWishlist(): {
   wishlist: string[];
   wishlistItems: WishlistItem[];
@@ -331,42 +354,74 @@ export function useWishlist(): {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [synced, setSynced] = useState(false);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const userId = useAppSelector((state) => state.auth.user?.id ?? null);
+  const allowGuestWishlist = false;
+  const hasToken = Boolean(getAccessToken());
+  const canUseApi = isAuthenticated && hasToken;
 
   // Fetch wishlist from backend
   const fetchWishlist = useCallback(async () => {
-    if (!isLoggedIn()) {
-      setWishlist(getStoredWishlist());
-      setWishlistItems(getStoredWishlistItems());
+    if (!canUseApi) {
+      if (allowGuestWishlist) {
+        setWishlist(getStoredWishlist());
+        setWishlistItems(getStoredWishlistItems());
+      } else {
+        setWishlist([]);
+        setWishlistItems([]);
+      }
+      return;
+    }
+
+    if (wishlistCacheReady && wishlistCache.userId === userId) {
+      setWishlist(wishlistCache.ids);
+      setWishlistItems(wishlistCache.items);
+      setSynced(true);
+      return;
+    }
+
+    if (wishlistFetchPromise) {
+      await wishlistFetchPromise;
+      if (wishlistCacheReady && wishlistCache.userId === userId) {
+        setWishlist(wishlistCache.ids);
+        setWishlistItems(wishlistCache.items);
+        setSynced(true);
+      }
       return;
     }
 
     setLoading(true);
-    try {
-      const response = await axiosInstance.get('/wishlist');
-      const data = response.data.data;
-      setWishlistItems(data.items || []);
-      setWishlist((data.items || []).map((item: WishlistItem) => item.packageId));
-      setSynced(true);
-    } catch (error: any) {
-      // If 401, tokens are expired/invalid - fallback to localStorage silently
-      // Don't throw or show error on public pages
-      if (error?.response?.status === 401) {
-        console.log('Wishlist: Auth expired, using local storage');
-      } else {
-        console.error('Failed to fetch wishlist:', error);
+    wishlistFetchPromise = (async () => {
+      try {
+        const response = await axiosInstance.get('/wishlist');
+        const data = response.data.data || {};
+        const items = Array.isArray(data.items) ? data.items : [];
+        const ids = items.map((item: WishlistItem) => item.packageId);
+        setWishlistCache(ids, items, userId);
+      } catch (error: any) {
+        const fallbackIds = allowGuestWishlist ? getStoredWishlist() : [];
+        const fallbackItems = allowGuestWishlist ? getStoredWishlistItems() : [];
+        setWishlistCache(fallbackIds, fallbackItems, userId);
       }
+    })();
 
-      // Always fallback to local storage on error
-      setWishlist(getStoredWishlist());
-      setWishlistItems(getStoredWishlistItems());
+    try {
+      await wishlistFetchPromise;
     } finally {
+      wishlistFetchPromise = null;
       setLoading(false);
     }
-  }, []);
+
+    if (wishlistCacheReady && wishlistCache.userId === userId) {
+      setWishlist(wishlistCache.ids);
+      setWishlistItems(wishlistCache.items);
+      setSynced(true);
+    }
+  }, [allowGuestWishlist, canUseApi, userId]);
 
   // Sync local wishlist to backend after login
   const syncWishlistToBackend = useCallback(async () => {
-    if (!isLoggedIn()) return;
+    if (!canUseApi || !allowGuestWishlist) return;
 
     const localWishlist = getStoredWishlist();
     const localItems = getStoredWishlistItems();
@@ -404,17 +459,32 @@ export function useWishlist(): {
     } finally {
       setLoading(false);
     }
-  }, [fetchWishlist]);
+  }, [fetchWishlist, canUseApi, allowGuestWishlist]);
 
   // Load wishlist on mount
   useEffect(() => {
-    if (isLoggedIn() && !synced) {
+    if (canUseApi && !synced) {
       fetchWishlist();
-    } else if (!isLoggedIn()) {
-      setWishlist(getStoredWishlist());
-      setWishlistItems(getStoredWishlistItems());
+      return;
     }
-  }, [fetchWishlist, synced]);
+
+    if (!canUseApi) {
+      if (allowGuestWishlist) {
+        setWishlist(getStoredWishlist());
+        setWishlistItems(getStoredWishlistItems());
+      } else {
+        setWishlist([]);
+        setWishlistItems([]);
+        setSynced(false);
+        resetWishlistCache();
+      }
+    }
+  }, [fetchWishlist, synced, canUseApi, allowGuestWishlist]);
+
+  useEffect(() => {
+    if (!canUseApi) return;
+    setWishlistCache(wishlist, wishlistItems, userId);
+  }, [wishlist, wishlistItems, canUseApi, userId]);
 
   // Cross-tab synchronization - listen for storage changes
   useEffect(() => {
@@ -487,7 +557,7 @@ export function useWishlist(): {
       }
     };
 
-    if (isLoggedIn()) {
+    if (canUseApi) {
       setLoading(true);
       try {
         const response = await axiosInstance.post('/wishlist/toggle', {
@@ -519,15 +589,16 @@ export function useWishlist(): {
         setLoading(false);
       }
     } else {
-      // Local storage only
-      toggleLocal();
+      if (allowGuestWishlist) {
+        toggleLocal();
+      }
     }
-  }, [wishlist]);
+  }, [wishlist, canUseApi, allowGuestWishlist]);
 
   const addToWishlist = useCallback(async (id: string, itemData?: Partial<WishlistItem>) => {
     if (wishlist.includes(id)) return;
 
-    if (isLoggedIn()) {
+    if (canUseApi) {
       setLoading(true);
       try {
         const response = await axiosInstance.post('/wishlist', {
@@ -550,33 +621,34 @@ export function useWishlist(): {
         setLoading(false);
       }
     } else {
-      // Local storage only
-      setWishlist(prev => {
-        const newList = [...prev, id];
-        setStoredWishlist(newList);
-        return newList;
-      });
-      if (itemData) {
-        setWishlistItems(prev => {
-          const newItem: WishlistItem = {
-            id: Date.now(),
-            packageId: id,
-            type: itemData.type || 'tour',
-            name: itemData.name || 'Unknown Package',
-            slug: itemData.slug || id,
-            image: itemData.image,
-            price: itemData.price || 0,
-            duration: itemData.duration,
-            destination: itemData.destination,
-            createdAt: new Date().toISOString(),
-          };
-          const newItems = [...prev, newItem];
-          setStoredWishlistItems(newItems);
-          return newItems;
+      if (allowGuestWishlist) {
+        setWishlist(prev => {
+          const newList = [...prev, id];
+          setStoredWishlist(newList);
+          return newList;
         });
+        if (itemData) {
+          setWishlistItems(prev => {
+            const newItem: WishlistItem = {
+              id: Date.now(),
+              packageId: id,
+              type: itemData.type || 'tour',
+              name: itemData.name || 'Unknown Package',
+              slug: itemData.slug || id,
+              image: itemData.image,
+              price: itemData.price || 0,
+              duration: itemData.duration,
+              destination: itemData.destination,
+              createdAt: new Date().toISOString(),
+            };
+            const newItems = [...prev, newItem];
+            setStoredWishlistItems(newItems);
+            return newItems;
+          });
+        }
       }
     }
-  }, [wishlist]);
+  }, [wishlist, canUseApi, allowGuestWishlist]);
 
   const removeFromWishlist = useCallback(async (id: string, type: string = 'tour') => {
     // Optimistic update - save current state for rollback
@@ -587,7 +659,7 @@ export function useWishlist(): {
     setWishlist(prev => prev.filter(item => item !== id));
     setWishlistItems(prev => prev.filter(item => item.packageId !== id));
 
-    if (isLoggedIn()) {
+    if (canUseApi) {
       setLoading(true);
       try {
         await axiosInstance.delete(`/wishlist/${id}?type=${type}`);
@@ -619,13 +691,14 @@ export function useWishlist(): {
         setLoading(false);
       }
     } else {
-      // Local storage only
-      const newWishlist = previousWishlist.filter(item => item !== id);
-      const newWishlistItems = previousWishlistItems.filter(item => item.packageId !== id);
-      setStoredWishlist(newWishlist);
-      setStoredWishlistItems(newWishlistItems);
+      if (allowGuestWishlist) {
+        const newWishlist = previousWishlist.filter(item => item !== id);
+        const newWishlistItems = previousWishlistItems.filter(item => item.packageId !== id);
+        setStoredWishlist(newWishlist);
+        setStoredWishlistItems(newWishlistItems);
+      }
     }
-  }, [wishlist, wishlistItems]);
+  }, [wishlist, wishlistItems, canUseApi, allowGuestWishlist]);
 
   const clearWishlist = useCallback(async () => {
     // Optimistic update - save current state for rollback
@@ -636,7 +709,7 @@ export function useWishlist(): {
     setWishlist([]);
     setWishlistItems([]);
 
-    if (isLoggedIn()) {
+    if (canUseApi) {
       setLoading(true);
       try {
         await axiosInstance.delete('/wishlist');
@@ -664,11 +737,12 @@ export function useWishlist(): {
         setLoading(false);
       }
     } else {
-      // Local storage only
-      localStorage.removeItem(WISHLIST_KEY);
-      localStorage.removeItem(WISHLIST_ITEMS_KEY);
+      if (allowGuestWishlist) {
+        localStorage.removeItem(WISHLIST_KEY);
+        localStorage.removeItem(WISHLIST_ITEMS_KEY);
+      }
     }
-  }, [wishlist, wishlistItems]);
+  }, [wishlist, wishlistItems, canUseApi, allowGuestWishlist]);
 
   const savedTrips = enrichedTripsData.filter(trip => wishlist.includes(trip.id));
 

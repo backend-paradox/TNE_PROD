@@ -81,6 +81,12 @@ export const getBookingStatsAPI = async () => {
 // BOOKING ACTIONS
 // ============================================
 
+// Initiate payment for booking (creates Razorpay order)
+export const initiateBookingPaymentAPI = async (id) => {
+  const response = await axiosInstance.post(`${API_ENDPOINTS.BOOKINGS}/${id}/payment`);
+  return response.data.data;
+};
+
 // Cancel booking
 export const cancelBookingAPI = async (id, reason = '') => {
   const response = await axiosInstance.post(`${API_ENDPOINTS.BOOKINGS}/${id}/cancel`, { reason });

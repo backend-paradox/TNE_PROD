@@ -3,8 +3,15 @@ const paymentService = require('../services/paymentService');
 class PaymentController {
   async createOrder(req, res, next) {
     try {
-      const { bookingId, amount, currency, notes, receipt } = req.body;
-      const userId = req.user.id;
+      const { bookingId, amount, currency, notes, receipt, userId: bodyUserId } = req.body;
+      const userId = req.user?.id || Number(bodyUserId);
+
+      if (!userId || Number.isNaN(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'userId is required',
+        });
+      }
 
       const result = await paymentService.createOrder({
         bookingId,
@@ -15,15 +22,23 @@ class PaymentController {
         receipt,
       });
 
+      const { payment, razorpayOrder } = result;
+
       res.status(201).json({
         success: true,
         message: 'Payment order created successfully',
         data: {
-          orderId: result.payment.orderId,
-          razorpayOrderId: result.razorpayOrder.id,
-          amount: result.razorpayOrder.amount,
-          currency: result.razorpayOrder.currency,
+          paymentId: payment.id,
+          orderId: payment.orderId,
+          bookingId: payment.bookingId,
+          amount: payment.amount,
+          currency: payment.currency,
+          razorpayOrderId: razorpayOrder.id,
+          razorpayOrderAmount: razorpayOrder.amount,
+          razorpayOrderCurrency: razorpayOrder.currency,
           razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+          payment,
+          razorpayOrder,
         },
       });
     } catch (error) {

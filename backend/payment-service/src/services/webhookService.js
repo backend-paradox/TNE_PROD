@@ -254,8 +254,13 @@ class WebhookService {
     }
 
     try {
+      const headers = {};
+      if (process.env.SERVICE_SECRET) {
+        headers['X-Service-Secret'] = process.env.SERVICE_SECRET;
+      }
+
       await axios.post(
-        `${bookingServiceUrl}/api/v1/booking/webhooks/payment`,
+        `${bookingServiceUrl}/api/v1/bookings/webhooks/payment`,
         {
           bookingId,
           event,
@@ -263,6 +268,7 @@ class WebhookService {
         },
         {
           timeout: 5000,
+          headers,
         }
       );
     } catch (error) {

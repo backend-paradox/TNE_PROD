@@ -13,7 +13,9 @@ export const formatCurrency = (amount: number): string => {
 };
 
 export const formatDate = (date: string | Date, formatString: string = 'dd MMM yyyy'): string => {
+  if (!date) return '';
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  if (Number.isNaN(dateObj.getTime())) return '';
   return format(dateObj, formatString);
 };
 

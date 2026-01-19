@@ -64,14 +64,36 @@ class PDFGenerator {
 
         console.log('Starting PDF generation for booking:', booking.bookingNumber);
 
-        // Render sections in order
-        await CoverPage.render(doc, { booking, package: pkg, images });
-        await BookingInfo.render(doc, { booking, user });
-        await ItinerarySection.render(doc, { package: pkg, booking, images });
-        await PricingSection.render(doc, { booking });
-        await HowToBook.render(doc, { booking });
-        await VisaInfo.render(doc, { package: pkg }); // Conditional - only renders if visaRequired
-        await PoliciesSection.render(doc, { package: pkg, booking, images });
+        // Render sections in order with error boundaries
+        // Each section is wrapped in try-catch so one failure doesn't kill the entire PDF
+
+        await this.renderSectionSafely(doc, 'CoverPage', async () => {
+          await CoverPage.render(doc, { booking, package: pkg, images });
+        });
+
+        await this.renderSectionSafely(doc, 'BookingInfo', async () => {
+          await BookingInfo.render(doc, { booking, user });
+        });
+
+        await this.renderSectionSafely(doc, 'Itinerary', async () => {
+          await ItinerarySection.render(doc, { package: pkg, booking, images });
+        });
+
+        await this.renderSectionSafely(doc, 'Pricing', async () => {
+          await PricingSection.render(doc, { booking });
+        });
+
+        await this.renderSectionSafely(doc, 'HowToBook', async () => {
+          await HowToBook.render(doc, { booking });
+        });
+
+        await this.renderSectionSafely(doc, 'VisaInfo', async () => {
+          await VisaInfo.render(doc, { package: pkg });
+        });
+
+        await this.renderSectionSafely(doc, 'Policies', async () => {
+          await PoliciesSection.render(doc, { package: pkg, booking, images });
+        });
 
         // Add page numbers to all pages
         this.addPageNumbers(doc);
@@ -92,18 +114,71 @@ class PDFGenerator {
    * @private
    */
   registerFonts(doc) {
+    const fontPath = path.join(__dirname, '../../../assets/fonts');
+    const fontsToRegister = [
+      { name: 'Poppins', file: 'Poppins-Regular.ttf' },
+      { name: 'Poppins-Bold', file: 'Poppins-Bold.ttf' },
+      { name: 'Poppins-SemiBold', file: 'Poppins-SemiBold.ttf' },
+    ];
+
+    let registeredCount = 0;
+
+    for (const font of fontsToRegister) {
+      try {
+        const fullPath = path.join(fontPath, font.file);
+        doc.registerFont(font.name, fullPath);
+        registeredCount++;
+      } catch (error) {
+        console.warn(`Failed to register font ${font.name}:`, error.message);
+        // Individual font failures don't stop other fonts from loading
+      }
+    }
+
+    if (registeredCount === fontsToRegister.length) {
+      console.log('All fonts registered successfully');
+    } else if (registeredCount > 0) {
+      console.log(`Registered ${registeredCount}/${fontsToRegister.length} fonts, using Helvetica fallback for missing fonts`);
+    } else {
+      console.warn('No custom fonts registered, using Helvetica fallback for all text');
+    }
+  }
+
+  /**
+   * Safely render a PDF section with error boundary
+   * If the section fails, renders an error placeholder and continues
+   * @private
+   * @param {PDFDocument} doc - The PDF document
+   * @param {string} sectionName - Name of the section for logging
+   * @param {Function} renderFn - Async function that renders the section
+   */
+  async renderSectionSafely(doc, sectionName, renderFn) {
     try {
-      const fontPath = path.join(__dirname, '../../../assets/fonts');
-
-      // Register Poppins font family
-      doc.registerFont('Poppins', path.join(fontPath, 'Poppins-Regular.ttf'));
-      doc.registerFont('Poppins-Bold', path.join(fontPath, 'Poppins-Bold.ttf'));
-      doc.registerFont('Poppins-SemiBold', path.join(fontPath, 'Poppins-SemiBold.ttf'));
-
-      console.log('Fonts registered successfully');
+      await renderFn();
+      console.log(`✓ ${sectionName} section rendered successfully`);
     } catch (error) {
-      console.warn('Font registration failed, using fallback fonts:', error.message);
-      // PDFKit will fallback to standard fonts if custom fonts fail
+      console.error(`✗ Error rendering ${sectionName} section:`, error.message);
+
+      // Render error placeholder so PDF doesn't break
+      try {
+        doc.addPage();
+        doc.font('Helvetica')
+           .fontSize(14)
+           .fillColor('#ef4444')
+           .text(`Error loading ${sectionName} section`, 50, 50);
+
+        doc.fontSize(10)
+           .fillColor('#6b7280')
+           .text('This section could not be rendered. Please contact support if this issue persists.', 50, 80, {
+             width: doc.page.width - 100
+           });
+
+        doc.text(`Error: ${error.message}`, 50, 120, {
+          width: doc.page.width - 100
+        });
+      } catch (placeholderError) {
+        // Even the error placeholder failed - just log and continue
+        console.error(`Failed to render error placeholder for ${sectionName}:`, placeholderError.message);
+      }
     }
   }
 

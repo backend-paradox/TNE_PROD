@@ -208,10 +208,11 @@ class HowToBook {
     doc.circle(iconX + 20, iconY, 20)
        .fill(colors.primary);
 
-    doc.font(fonts.bold)
-       .fontSize(fontSize.h4)
+    // Use ASCII-safe phone symbol (Poppins font doesn't support emoji glyphs)
+    doc.font('Helvetica-Bold')
+       .fontSize(fontSize.h3)
        .fillColor(colors.white)
-       .text('📞', iconX + 12, iconY - 10, {
+       .text('Tel', iconX + 6, iconY - 8, {
          lineBreak: false
        });
 

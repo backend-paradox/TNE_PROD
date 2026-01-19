@@ -297,13 +297,14 @@ class BookingService {
     }
 
     // Call payment service to create order
-    const paymentServiceUrl = process.env.PAYMENT_SERVICE_URL || 'http://payment-service:3007';
+    const paymentServiceUrl = process.env.PAYMENT_SERVICE_URL || 'http://payment-service:3005';
 
     try {
       const response = await axios.post(
         `${paymentServiceUrl}/api/v1/payments/orders`,
         {
           bookingId: booking.id,
+          userId: booking.userId,
           amount: parseFloat(booking.totalAmount),
           currency: booking.currency,
           notes: {
@@ -315,16 +316,27 @@ class BookingService {
         },
         {
           timeout: 10000,
+          headers: {
+            'X-Internal-Service': 'booking-service',
+          },
         }
       );
 
-      const { payment, razorpayOrder } = response.data.data;
+      const responseData = response.data?.data || {};
+      const payment = responseData.payment || {};
+      const razorpayOrder = responseData.razorpayOrder || {};
+      const paymentId = payment.id || responseData.paymentId;
+      const razorpayOrderId = razorpayOrder.id || responseData.razorpayOrderId;
+
+      if (!paymentId) {
+        throw new Error('Payment service did not return payment ID');
+      }
 
       // Update booking with payment ID
       await prisma.booking.update({
         where: { id: bookingId },
         data: {
-          paymentId: payment.id,
+          paymentId: paymentId,
           status: 'PAYMENT_PENDING',
           paymentStatus: 'PENDING',
         },
@@ -333,10 +345,12 @@ class BookingService {
       return {
         bookingId: booking.id,
         bookingNumber: booking.bookingNumber,
-        paymentId: payment.id,
-        razorpayOrderId: razorpayOrder.id,
+        paymentId: paymentId,
+        razorpayOrderId: razorpayOrderId,
         amount: booking.totalAmount,
+        amountInPaise: razorpayOrder.amount || responseData.razorpayOrderAmount || Math.round(parseFloat(booking.totalAmount) * 100),
         currency: booking.currency,
+        razorpayKeyId: responseData.razorpayKeyId,
       };
     } catch (error) {
       console.error('Payment initiation failed:', error.message);

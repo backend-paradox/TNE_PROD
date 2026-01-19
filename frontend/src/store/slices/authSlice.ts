@@ -163,6 +163,9 @@ export const logout = createAsyncThunk<AuthResponse, void>('auth/logout', async 
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     localStorage.removeItem('auth-storage');
+    localStorage.removeItem('booking-storage');
+    localStorage.removeItem('travel-wishlist');
+    localStorage.removeItem('travel-wishlist-items');
   }
 
   return { success: true };
@@ -173,6 +176,9 @@ export const clearAuth = createAsyncThunk<AuthResponse, void>('auth/clearAuth', 
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('user');
   localStorage.removeItem('auth-storage');
+  localStorage.removeItem('booking-storage');
+  localStorage.removeItem('travel-wishlist');
+  localStorage.removeItem('travel-wishlist-items');
   return { success: true };
 });
 

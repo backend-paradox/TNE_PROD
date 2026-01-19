@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,6 +15,8 @@ import {
   CreditCard,
   Shield,
   Tag,
+  Plus,
+  Minus,
   Loader2,
   AlertCircle,
   X,
@@ -22,7 +24,6 @@ import {
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
-  addTravelerDetail,
   applyPromoCode,
   calculatePricing,
   createBooking,
@@ -31,12 +32,17 @@ import {
   setContact,
   setStep,
   setTrip,
+  setTravelDate,
+  setTravelers,
+  setTravelerDetails,
   updateTravelerDetail,
 } from '../store/slices/bookingSlice';
 import { formatCurrency, formatDuration, formatDate, generateId } from '../utils';
-import { Traveler, TravelerType } from '../types';
+import { Traveler } from '../types';
 import toast, { Toaster } from 'react-hot-toast';
 import { useRazorpay } from '../hooks/useRazorpay';
+import { initiateBookingPaymentAPI } from '../features/booking/bookingAPI';
+import { verifyPaymentAPI } from '../features/payment/paymentAPI';
 import './BookingPage.css';
 
 const steps = [
@@ -66,6 +72,18 @@ export function BookingPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  type TravelerCountKey = 'adults' | 'children' | 'infants';
+  const travelDateValue = travelDate ? travelDate.slice(0, 10) : '';
+  const startDates = Array.isArray(trip?.startDates) ? trip.startDates.filter(Boolean) : [];
+  const hasStartDates = startDates.length > 0;
+  const today = new Date().toISOString().slice(0, 10);
+
+  const contactInitializedRef = useRef(false);
+  const travelerCacheRef = useRef<{ adult: Traveler[]; child: Traveler[]; infant: Traveler[] }>({
+    adult: [],
+    child: [],
+    infant: [],
+  });
 
   // Form state
   const [contactForm, setContactForm] = useState({
@@ -74,6 +92,24 @@ export function BookingPage() {
     phone: contact?.phone || user?.phone || '',
     alternatePhone: contact?.alternatePhone || '',
   });
+
+  useEffect(() => {
+    if (contactInitializedRef.current) return;
+    if (contact || user) {
+      const hasInput = Boolean(
+        contactForm.name || contactForm.email || contactForm.phone || contactForm.alternatePhone
+      );
+      if (!hasInput) {
+        setContactForm({
+          name: contact?.name || user?.name || '',
+          email: contact?.email || user?.email || '',
+          phone: contact?.phone || user?.phone || '',
+          alternatePhone: contact?.alternatePhone || '',
+        });
+      }
+      contactInitializedRef.current = true;
+    }
+  }, [contact, user, contactForm]);
 
   useEffect(() => {
     // If trip is null in Redux but available in router state, set it in Redux
@@ -96,51 +132,91 @@ export function BookingPage() {
   }, [dispatch, trip, tripFromRouter, navigate]);
 
   useEffect(() => {
-    // Initialize traveler details if empty
-    if (travelerDetails.length === 0 && trip) {
-      const initialTravelers: Traveler[] = [];
+    if (!trip || travelerDetails.length > 0) return;
+    const initialTravelers = reconcileTravelerDetails(travelers, []);
+    dispatch(setTravelerDetails(initialTravelers));
+  }, [dispatch, trip, travelerDetails.length, travelers.adults, travelers.children, travelers.infants]);
 
-      for (let i = 0; i < travelers.adults; i++) {
-        initialTravelers.push({
-          id: generateId(),
-          type: 'adult',
-          firstName: i === 0 && user?.name ? user.name.split(' ')[0] : '',
-          lastName: i === 0 && user?.name ? user.name.split(' ').slice(1).join(' ') : '',
-          email: i === 0 ? user?.email || '' : '',
-          phone: i === 0 ? user?.phone || '' : '',
-          dateOfBirth: '',
-          gender: '',
-          nationality: 'Indian',
-        });
+  const createTraveler = (type: Traveler['type'], index: number): Traveler => {
+    const isFirstAdult = type === 'adult' && index === 0;
+    const nameParts = isFirstAdult && user?.name ? user.name.split(' ') : [];
+    return {
+      id: generateId(),
+      type,
+      firstName: isFirstAdult ? nameParts[0] || '' : '',
+      lastName: isFirstAdult ? nameParts.slice(1).join(' ') : '',
+      email: isFirstAdult ? user?.email || '' : '',
+      phone: isFirstAdult ? user?.phone || '' : '',
+      dateOfBirth: '',
+      gender: '',
+      nationality: 'Indian',
+    };
+  };
+
+  const reconcileTravelerDetails = (
+    counts: { adults: number; children: number; infants: number },
+    currentList: Traveler[]
+  ): Traveler[] => {
+    const adults = currentList.filter((t) => t.type === 'adult');
+    const children = currentList.filter((t) => t.type === 'child');
+    const infants = currentList.filter((t) => t.type === 'infant');
+    const cache = travelerCacheRef.current;
+
+    const reconcileType = (type: Traveler['type'], count: number, existing: Traveler[]) => {
+      if (existing.length > count) {
+        const removed = existing.slice(count);
+        cache[type] = [...removed, ...cache[type]];
       }
 
-      for (let i = 0; i < travelers.children; i++) {
-        initialTravelers.push({
-          id: generateId(),
-          type: 'child',
-          firstName: '',
-          lastName: '',
-          dateOfBirth: '',
-          gender: '',
-          nationality: 'Indian',
-        });
+      const next = existing.slice(0, count);
+      while (next.length < count) {
+        const cached = cache[type].shift();
+        next.push(cached || createTraveler(type, next.length));
       }
 
-      for (let i = 0; i < travelers.infants; i++) {
-        initialTravelers.push({
-          id: generateId(),
-          type: 'infant',
-          firstName: '',
-          lastName: '',
-          dateOfBirth: '',
-          gender: '',
-          nationality: 'Indian',
-        });
-      }
+      return next;
+    };
 
-      initialTravelers.forEach((t) => dispatch(addTravelerDetail(t)));
+    const nextAdults = reconcileType('adult', counts.adults, adults);
+    const nextChildren = reconcileType('child', counts.children, children);
+    const nextInfants = reconcileType('infant', counts.infants, infants);
+
+    return [...nextAdults, ...nextChildren, ...nextInfants];
+  };
+
+  const handleTravelerCountChange = (key: TravelerCountKey, delta: number) => {
+    const minValue = key === 'adults' ? 1 : 0;
+    const nextValue = Math.max(minValue, travelers[key] + delta);
+    if (nextValue === travelers[key]) return;
+
+    const nextCounts = { ...travelers, [key]: nextValue };
+    dispatch(setTravelers(nextCounts));
+    dispatch(setTravelerDetails(reconcileTravelerDetails(nextCounts, travelerDetails)));
+  };
+
+  useEffect(() => {
+    if (!trip) return;
+    const requiredCounts = {
+      adults: travelers.adults,
+      children: travelers.children,
+      infants: travelers.infants,
+    };
+    const actualCounts = {
+      adults: travelerDetails.filter((t) => t.type === 'adult').length,
+      children: travelerDetails.filter((t) => t.type === 'child').length,
+      infants: travelerDetails.filter((t) => t.type === 'infant').length,
+    };
+    const requiredTotal = requiredCounts.adults + requiredCounts.children + requiredCounts.infants;
+    const actualTotal = travelerDetails.length;
+    const mismatch = requiredTotal !== actualTotal
+      || requiredCounts.adults !== actualCounts.adults
+      || requiredCounts.children !== actualCounts.children
+      || requiredCounts.infants !== actualCounts.infants;
+
+    if (mismatch) {
+      dispatch(setTravelerDetails(reconcileTravelerDetails(requiredCounts, travelerDetails)));
     }
-  }, []);
+  }, [dispatch, trip, travelers.adults, travelers.children, travelers.infants, travelerDetails]);
 
   const updateTraveler = (id: string, field: string, value: string) => {
     dispatch(updateTravelerDetail({ id, data: { [field]: value } }));
@@ -176,6 +252,11 @@ export function BookingPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     // Phone validation regex (Indian format: 10 digits)
     const phoneRegex = /^[6-9]\d{9}$/;
+
+    if (!travelDateValue) {
+      toast.error('Please select a travel date');
+      return false;
+    }
 
     // Validate contact info
     if (!contactForm.name.trim()) {
@@ -359,24 +440,38 @@ export function BookingPage() {
         })).unwrap();
 
         toast.dismiss('booking-confirm');
-        toast.success('Booking confirmed successfully!', { icon: '✅', duration: 3000 });
+        toast.success('Booking confirmed successfully!', { icon: 'OK', duration: 3000 });
 
         // Navigate to confirmation page
         setTimeout(() => {
           navigate(`/booking/confirmation/${confirmedBooking.id}`);
         }, 1000);
       } else {
+        // Step 2: Initiate payment order from backend
+        const paymentInit = await initiateBookingPaymentAPI(bookingId);
+
+        if (!paymentInit?.razorpayOrderId) {
+          throw new Error('Payment order creation failed');
+        }
+
+        const orderAmountInPaise = paymentInit.amountInPaise
+          || paymentInit.razorpayOrderAmount
+          || Math.round(Number(paymentInit.amount || pricing.total) * 100);
+
+        const razorpayKey = paymentInit.razorpayKeyId || RAZORPAY_KEY;
+
         // Real Razorpay payment flow
         // Map payment method to Razorpay method
         const razorpayMethod = paymentMethod === 'card' ? 'card' : paymentMethod === 'upi' ? 'upi' : 'netbanking';
 
         const options = {
-          key: RAZORPAY_KEY,
-          amount: pricing.total * 100, // Amount in paise
-          currency: 'INR',
+          key: razorpayKey,
+          amount: orderAmountInPaise,
+          currency: paymentInit.currency || 'INR',
           name: 'Trip & Event',
           description: `Booking for ${trip?.title || 'Tour Package'}`,
           image: '/logo.png',
+          order_id: paymentInit.razorpayOrderId,
           method: razorpayMethod, // Pre-select payment method
           prefill: {
             name: contact.name,
@@ -397,18 +492,27 @@ export function BookingPage() {
             console.log('Payment Success:', response);
 
             try {
+              toast.loading('Verifying payment...', { id: 'payment-verify' });
+
+              const verification = await verifyPaymentAPI({
+                razorpayOrderId: response.razorpay_order_id || paymentInit.razorpayOrderId,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+
+              toast.dismiss('payment-verify');
               toast.loading('Confirming booking...', { id: 'booking-confirm' });
 
-              // Confirm booking with real payment details
+              // Confirm booking with verified payment details
               const confirmedBooking = await dispatch(confirmBooking({
                 bookingId,
-                paymentId: response.razorpay_payment_id,
-                transactionId: response.razorpay_order_id || `TXN-${Date.now()}`,
+                paymentId: verification.paymentId || response.razorpay_payment_id,
+                transactionId: verification.orderId || response.razorpay_order_id || `TXN-${Date.now()}`,
               })).unwrap();
 
               toast.dismiss('booking-confirm');
               toast.success('Payment successful! Booking confirmed.', {
-                icon: '✅',
+                icon: 'OK',
                 duration: 4000,
               });
 
@@ -434,7 +538,7 @@ export function BookingPage() {
           modal: {
             ondismiss: () => {
               setIsProcessing(false);
-              toast.error('Payment cancelled. Your booking is saved and can be completed later.', { icon: '❌' });
+              toast.error('Payment cancelled. Your booking is saved and can be completed later.', { icon: '!' });
             },
           },
         };
@@ -482,13 +586,13 @@ export function BookingPage() {
     }
   };
 
-  if (!trip) {
-    return (
-      <div className="booking-loading">
-        <Loader2 />
-      </div>
-    );
-  }
+    if (!trip || !pricing) {
+      return (
+        <div className="booking-loading">
+          <Loader2 />
+        </div>
+      );
+    }
 
   return (
     <div className="booking-page">
@@ -524,79 +628,102 @@ export function BookingPage() {
           <div className="booking-main">
             <AnimatePresence mode="wait">
               {/* Step 1: Traveler Details */}
-              {step === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                >
-                  {/* Contact Information */}
-                  <div className="booking-card">
-                    <h2 className="booking-card-title">
-                      <Phone />
-                      Contact Information
-                    </h2>
-                    <p className="booking-card-subtitle">
-                      Booking confirmation will be sent to this contact
-                    </p>
-                    <div className="booking-form-grid">
-                      <div className="booking-form-group">
-                        <label className="booking-form-label">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={contactForm.name}
-                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                          className="booking-form-input"
-                          placeholder="Enter full name"
-                        />
-                      </div>
-                      <div className="booking-form-group">
-                        <label className="booking-form-label">
-                          Email Address *
-                        </label>
-                        <input
-                          type="email"
-                          value={contactForm.email}
-                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                          className="booking-form-input"
-                          placeholder="Enter email"
-                        />
-                      </div>
-                      <div className="booking-form-group">
-                        <label className="booking-form-label">
-                          Phone Number *
-                        </label>
-                        <input
-                          type="tel"
-                          value={contactForm.phone}
-                          onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                          className="booking-form-input"
-                          placeholder="+91 XXXXX XXXXX"
-                        />
-                      </div>
-                      <div className="booking-form-group">
-                        <label className="booking-form-label">
-                          Alternate Phone
-                        </label>
-                        <input
-                          type="tel"
-                          value={contactForm.alternatePhone}
-                          onChange={(e) => setContactForm({ ...contactForm, alternatePhone: e.target.value })}
-                          className="booking-form-input"
-                          placeholder="Optional"
-                        />
+                {step === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                  >
+                    <div className="booking-card">
+                      <h2 className="booking-card-title">
+                        <Users />
+                        Traveler Count
+                      </h2>
+                      <p className="booking-card-subtitle">
+                        Set the number of travelers first, then fill in their details.
+                      </p>
+                      <div className="booking-traveler-counts">
+                        {[
+                          { key: 'adults', label: 'Adults', hint: 'Age 12+', price: trip.price.adult },
+                          { key: 'children', label: 'Children', hint: 'Age 2-11', price: trip.price.adult },
+                          { key: 'infants', label: 'Infants', hint: 'Under 2', price: trip.price.adult },
+                        ].map((item) => (
+                          <div key={item.key} className="booking-traveler-count-card">
+                            <div className="booking-traveler-count-info">
+                              <span className="booking-traveler-count-label">{item.label}</span>
+                              <span className="booking-traveler-count-subtitle">{item.hint}</span>
+                              <span className="booking-traveler-count-price">
+                                {formatCurrency(item.price)} per person
+                              </span>
+                            </div>
+                            <div className="booking-traveler-count-controls">
+                              <button
+                                type="button"
+                                className="booking-count-btn"
+                                onClick={() => handleTravelerCountChange(item.key as TravelerCountKey, -1)}
+                                disabled={item.key === 'adults' ? travelers.adults <= 1 : travelers[item.key as TravelerCountKey] <= 0}
+                              >
+                                <Minus />
+                              </button>
+                              <span className="booking-count-value">{travelers[item.key as TravelerCountKey]}</span>
+                              <button
+                                type="button"
+                                className="booking-count-btn"
+                                onClick={() => handleTravelerCountChange(item.key as TravelerCountKey, 1)}
+                              >
+                                <Plus />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Traveler Details */}
-                  <div className="booking-card">
-                    <h2 className="booking-card-title">
-                      <Users />
-                      Traveler Details
+                    <div className="booking-card">
+                      <h2 className="booking-card-title">
+                        <Calendar />
+                        Travel Date
+                      </h2>
+                      <p className="booking-card-subtitle">
+                        Choose your preferred travel date.
+                      </p>
+                      <div className="booking-form-grid">
+                        <div className="booking-form-group">
+                          <label className="booking-form-label">
+                            Select Travel Date *
+                          </label>
+                          {hasStartDates ? (
+                            <select
+                              value={travelDateValue}
+                              onChange={(e) => dispatch(setTravelDate(e.target.value))}
+                              className="booking-form-select"
+                            >
+                              <option value="">Select date</option>
+                              {startDates.map((date) => (
+                                <option key={date} value={date}>
+                                  {formatDate(date)}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="date"
+                              value={travelDateValue}
+                              min={today}
+                              onChange={(e) => dispatch(setTravelDate(e.target.value))}
+                              className="booking-form-input"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Traveler Details */}
+                    <div className="booking-card">
+                      <h2 className="booking-card-title">
+                        <Users />
+                        Traveler Details
                     </h2>
 
                     <div className="booking-travelers-list">
@@ -731,6 +858,67 @@ export function BookingPage() {
                             <Calendar />
                             {formatDate(travelDate)}
                           </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="booking-card">
+                      <h2 className="booking-card-title">
+                        <Phone />
+                        Contact Information
+                      </h2>
+                      <p className="booking-card-subtitle">
+                        Booking confirmation will be sent to this contact
+                      </p>
+                      <div className="booking-form-grid">
+                        <div className="booking-form-group">
+                          <label className="booking-form-label">
+                            Full Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={contactForm.name}
+                            onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                            className="booking-form-input"
+                            placeholder="Enter full name"
+                          />
+                        </div>
+                        <div className="booking-form-group">
+                          <label className="booking-form-label">
+                            Email Address *
+                          </label>
+                          <input
+                            type="email"
+                            value={contactForm.email}
+                            onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                            className="booking-form-input"
+                            placeholder="Enter email"
+                          />
+                        </div>
+                        <div className="booking-form-group">
+                          <label className="booking-form-label">
+                            Phone Number *
+                          </label>
+                          <input
+                            type="tel"
+                            value={contactForm.phone}
+                            onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                            className="booking-form-input"
+                            placeholder="+91 XXXXX XXXXX"
+                          />
+                        </div>
+                        <div className="booking-form-group">
+                          <label className="booking-form-label">
+                            Alternate Phone
+                          </label>
+                          <input
+                            type="tel"
+                            value={contactForm.alternatePhone}
+                            onChange={(e) => setContactForm({ ...contactForm, alternatePhone: e.target.value })}
+                            className="booking-form-input"
+                            placeholder="Optional"
+                          />
                         </div>
                       </div>
                     </div>

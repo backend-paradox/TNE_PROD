@@ -2,6 +2,23 @@ const bookingService = require('../services/bookingService');
 const { ApiError, ApiResponse } = require('../../../shared/src/utils');
 const { asyncHandler } = require('../../../shared/src/middleware/asyncHandler');
 
+// PDF generation timeout (30 seconds)
+const PDF_GENERATION_TIMEOUT = 30000;
+
+/**
+ * Wrap a promise with a timeout
+ * @param {Promise} promise - The promise to wrap
+ * @param {number} ms - Timeout in milliseconds
+ * @param {string} errorMessage - Error message if timeout occurs
+ * @returns {Promise} - The original promise or rejection on timeout
+ */
+const withTimeout = (promise, ms, errorMessage) => {
+  const timeout = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error(errorMessage)), ms);
+  });
+  return Promise.race([promise, timeout]);
+};
+
 /**
  * @desc    Create hotel booking
  * @route   POST /api/v1/bookings/hotels
@@ -265,15 +282,27 @@ const getBookingVoucher = asyncHandler(async (req, res) => {
 const generateTestPDF = asyncHandler(async (req, res) => {
   const { mockBooking, mockPackage, mockUser } = require('../services/mockData');
 
-  // Generate PDF with mock data
+  // Generate PDF with mock data (with 30-second timeout)
   const PDFGenerator = require('../services/pdf/pdfGenerator');
   const pdfGenerator = new PDFGenerator();
 
-  const pdfBuffer = await pdfGenerator.generateItinerary({
-    booking: mockBooking,
-    package: mockPackage,
-    user: mockUser
-  });
+  let pdfBuffer;
+  try {
+    pdfBuffer = await withTimeout(
+      pdfGenerator.generateItinerary({
+        booking: mockBooking,
+        package: mockPackage,
+        user: mockUser
+      }),
+      PDF_GENERATION_TIMEOUT,
+      'PDF generation timed out after 30 seconds'
+    );
+  } catch (error) {
+    if (error.message.includes('timed out')) {
+      throw ApiError.internal('PDF generation is taking too long. Please try again later.');
+    }
+    throw error;
+  }
 
   // Set response headers for PDF download
   const filename = `TNE-${mockBooking.bookingNumber}-PREVIEW.pdf`;
@@ -310,8 +339,20 @@ const downloadBookingPDF = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('PDF is only available for confirmed bookings');
   }
 
-  // Generate PDF
-  const pdfBuffer = await bookingService.generateItineraryPDF(parseInt(id));
+  // Generate PDF with 30-second timeout
+  let pdfBuffer;
+  try {
+    pdfBuffer = await withTimeout(
+      bookingService.generateItineraryPDF(parseInt(id)),
+      PDF_GENERATION_TIMEOUT,
+      'PDF generation timed out after 30 seconds'
+    );
+  } catch (error) {
+    if (error.message.includes('timed out')) {
+      throw ApiError.internal('PDF generation is taking too long. Please try again later.');
+    }
+    throw error;
+  }
 
   // Set response headers for PDF download
   const filename = `TNE-${booking.bookingNumber}.pdf`;

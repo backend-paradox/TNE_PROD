@@ -828,30 +828,31 @@ class PoliciesSection {
     const cardGap = spacing.md;
     const cardWidth = (width - cardGap) / 2;
 
+    // Use ASCII-safe icons (Poppins font doesn't support emoji glyphs)
     const contactMethods = [
       {
-        icon: '📞',
+        icon: 'Tel',
         label: 'Call Us',
         value: branding.phone,
         sublabel: 'Available 24/7',
         color: colors.success
       },
       {
-        icon: '✉️',
+        icon: '@',
         label: 'Email Us',
         value: branding.email,
         sublabel: 'Response within 2 hours',
         color: colors.info || colors.primary
       },
       {
-        icon: '💬',
+        icon: 'WA',
         label: 'WhatsApp',
         value: branding.whatsapp || branding.phone,
         sublabel: 'Instant messaging',
         color: colors.success
       },
       {
-        icon: '🌐',
+        icon: 'www',
         label: 'Visit Website',
         value: branding.website || 'www.tripandevent.com',
         sublabel: 'Explore more packages',
@@ -874,10 +875,15 @@ class PoliciesSection {
       doc.circle(cardX + cardPadding + 20, iconY + 20, 20)
          .fill(method.color);
 
-      doc.font(fonts.bold)
-         .fontSize(fontSize.h4)
+      // Use Helvetica for better ASCII text rendering in icon circles
+      // Adjust font size based on icon text length
+      const iconFontSize = method.icon.length > 2 ? fontSize.tiny : fontSize.body;
+      const iconXOffset = method.icon.length > 2 ? 6 : 12;
+
+      doc.font('Helvetica-Bold')
+         .fontSize(iconFontSize)
          .fillColor(colors.white)
-         .text(method.icon, cardX + cardPadding + 12, iconY + 10, {
+         .text(method.icon, cardX + cardPadding + iconXOffset, iconY + 14, {
            lineBreak: false
          });
 

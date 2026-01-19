@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar, 
+import {
+  User,
+  Mail,
+  Phone,
   ChevronDown,
   AlertCircle,
   Trash2,
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Traveler } from '../../types';
 import { generateId, validateEmail, validatePhone } from '../../utils';
+import { DatePicker } from '../ui/date-picker';
 
 interface TravelerFormProps {
   travelers: Traveler[];
@@ -85,26 +85,31 @@ export function TravelerForm({ travelers, travelerCounts, onChange, errors = {} 
     return `${typeLabels[traveler.type]} ${typeCount}`;
   };
 
-  const getMaxDate = (type: 'adult' | 'child' | 'infant'): string => {
-    const today = new Date();
+  const getMaxDate = (type: 'adult' | 'child' | 'infant'): Date => {
+    const date = new Date();
     if (type === 'adult') {
-      today.setFullYear(today.getFullYear() - 12);
+      date.setFullYear(date.getFullYear() - 12);
     } else if (type === 'child') {
-      today.setFullYear(today.getFullYear() - 2);
+      date.setFullYear(date.getFullYear() - 2);
     }
-    return today.toISOString().split('T')[0];
+    return date;
   };
 
-  const getMinDate = (type: 'adult' | 'child' | 'infant'): string => {
-    const today = new Date();
+  const getMinDate = (type: 'adult' | 'child' | 'infant'): Date => {
+    const date = new Date();
     if (type === 'child') {
-      today.setFullYear(today.getFullYear() - 12);
+      date.setFullYear(date.getFullYear() - 12);
     } else if (type === 'infant') {
-      today.setFullYear(today.getFullYear() - 2);
+      date.setFullYear(date.getFullYear() - 2);
     } else {
-      today.setFullYear(today.getFullYear() - 100);
+      date.setFullYear(date.getFullYear() - 100);
     }
-    return today.toISOString().split('T')[0];
+    return date;
+  };
+
+  const formatDateForStorage = (date: Date | undefined): string => {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];
   };
 
   return (
@@ -228,7 +233,7 @@ export function TravelerForm({ travelers, travelerCounts, onChange, errors = {} 
                           value={traveler.email || ''}
                           onChange={(e) => updateTraveler(index, 'email', e.target.value)}
                           placeholder="email@example.com"
-                          className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                          className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all"
                         />
                       </div>
                     </div>
@@ -247,7 +252,7 @@ export function TravelerForm({ travelers, travelerCounts, onChange, errors = {} 
                           value={traveler.phone || ''}
                           onChange={(e) => updateTraveler(index, 'phone', e.target.value)}
                           placeholder="+91 900 700 0777"
-                          className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                          className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all"
                         />
                       </div>
                     </div>
@@ -258,17 +263,17 @@ export function TravelerForm({ travelers, travelerCounts, onChange, errors = {} 
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       Date of Birth <span className="text-red-500">*</span>
                     </label>
-                    <div className="relative">
-                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="date"
-                        value={traveler.dateOfBirth}
-                        onChange={(e) => updateTraveler(index, 'dateOfBirth', e.target.value)}
-                        max={getMaxDate(traveler.type)}
-                        min={getMinDate(traveler.type)}
-                        className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
-                      />
-                    </div>
+                    <DatePicker
+                      value={traveler.dateOfBirth}
+                      onChange={(date) => updateTraveler(index, 'dateOfBirth', formatDateForStorage(date))}
+                      placeholder="Select date of birth"
+                      minDate={getMinDate(traveler.type)}
+                      maxDate={getMaxDate(traveler.type)}
+                      error={!!errors[`traveler_${index}_dateOfBirth`]}
+                    />
+                    {errors[`traveler_${index}_dateOfBirth`] && (
+                      <p className="text-red-500 text-xs mt-1">{errors[`traveler_${index}_dateOfBirth`]}</p>
+                    )}
                   </div>
 
                   {/* Gender */}

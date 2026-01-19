@@ -9,16 +9,17 @@ const {
   paginationSchema,
 } = require('../validators/payment.validator');
 
-// Middleware (will be added from shared package)
-const authenticate = (req, res, next) => {
-  // Placeholder - will be replaced with actual auth middleware
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
+// Middleware
+const { authenticate } = require('../../../shared/src/middleware/auth');
+
+const ALLOWED_INTERNAL_SERVICES = ['booking-service'];
+
+const authenticateOrInternal = (req, res, next) => {
+  const internalService = req.headers['x-internal-service'];
+  if (internalService && ALLOWED_INTERNAL_SERVICES.includes(internalService)) {
+    return next();
   }
-  // Mock user for now
-  req.user = { id: 1, role: 'USER' };
-  next();
+  return authenticate(req, res, next);
 };
 
 const validate = (schema) => async (req, res, next) => {
@@ -41,7 +42,7 @@ const validate = (schema) => async (req, res, next) => {
 // Create order (requires authentication)
 router.post(
   '/orders',
-  authenticate,
+  authenticateOrInternal,
   validate(createOrderSchema),
   paymentController.createOrder
 );
